@@ -1,5 +1,6 @@
 package unq.dapp.grupoj.soccergenius.exceptions.handlers;
 
+import org.apache.hc.client5.http.auth.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
@@ -53,6 +54,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenVerificationException.class)
     public ResponseEntity<String> handleGenericRuntime(TokenVerificationException ex) {
         logger.error("Token verification exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 }

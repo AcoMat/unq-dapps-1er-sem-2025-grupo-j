@@ -16,11 +16,13 @@ public class AuthService {
     private final UsersRepository usersRepository;
     private final Mapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(UsersRepository usersRepository, Mapper mapper, PasswordEncoder passwordEncoder) {
+    public AuthService(UsersRepository usersRepository, Mapper mapper, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.usersRepository = usersRepository;
         this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
 
@@ -35,7 +37,7 @@ public class AuthService {
 
         usersRepository.save(new_app_user);
 
-        return new AuthResponse(mapper.toDTO(new_app_user), JwtTokenProvider.generateToken(new_app_user.getId()));
+        return new AuthResponse(mapper.toDTO(new_app_user), jwtTokenProvider.generateToken(new_app_user.getId()));
     }
 
     public AuthResponse login(LoginCredentials credentials){
@@ -44,6 +46,6 @@ public class AuthService {
             throw new IllegalArgumentException("Email or password is incorrect");
         }
 
-        return new AuthResponse(mapper.toDTO(appUser), JwtTokenProvider.generateToken(appUser.getId()));
+        return new AuthResponse(mapper.toDTO(appUser), jwtTokenProvider.generateToken(appUser.getId()));
     }
 }

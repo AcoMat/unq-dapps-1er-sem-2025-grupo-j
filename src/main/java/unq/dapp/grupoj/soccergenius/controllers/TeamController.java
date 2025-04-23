@@ -18,15 +18,17 @@ import java.util.List;
 public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public TeamController(TeamService teamService){
+    public TeamController(TeamService teamService, JwtTokenProvider jwtTokenProvider) {
         this.teamService = teamService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @GetMapping("/{teamName}/{country}/players")
     @Operation(summary = "retorna información de los jugadores de un equipo, incluyendo nombre, partidos jugados, goles, asistencias y rating.")
     public ResponseEntity<List<Player>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country, @RequestHeader HttpHeaders header){
-        JwtTokenProvider.validateToken(header.getFirst("Authorization"));
+        jwtTokenProvider.validateToken(header.getFirst("Authorization"));
 
         long startTime = System.currentTimeMillis();
         logger.info("Request received to get players for team {} in country {}", teamName, country);
