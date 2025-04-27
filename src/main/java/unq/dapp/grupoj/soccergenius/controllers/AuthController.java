@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unq.dapp.grupoj.soccergenius.model.dtos.AuthResponse;
-import unq.dapp.grupoj.soccergenius.model.dtos.LoginCredentials;
-import unq.dapp.grupoj.soccergenius.model.dtos.RegisterFormDTO;
+import unq.dapp.grupoj.soccergenius.model.dtos.Auth.AuthResponse;
+import unq.dapp.grupoj.soccergenius.model.dtos.Auth.LoginCredentials;
+import unq.dapp.grupoj.soccergenius.model.dtos.Auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;
 import unq.dapp.grupoj.soccergenius.services.implementation.AuthService;
 
