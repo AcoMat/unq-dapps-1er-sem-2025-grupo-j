@@ -9,6 +9,7 @@ import lombok.ToString;
 @Getter
 public class Player {
 
+    //TODO: ADD HISTORICAL STATS, CONTEMPLATE SUMMARY STATS, ADD POSITION, ACTUAL TEAM, ETC.
     private String name;
     private String gamesPlayed;
     private String goals;
