@@ -9,7 +9,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +61,8 @@ public class WebScrapingService {
                 String assists     = player.findElement(By.className("assistTotal")).getText();
                 String rating      = player.findElement(By.xpath("./*[15]")).getText();
 
-                Player p = new Player(name,gamesPlayed,goals,assists,rating);
+                //Player p = new Player(name,gamesPlayed,goals,assists,rating);
+                Player p = new Player();
                 scrapedData.add(p);
             }
         } finally {

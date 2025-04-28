@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.security.JwtTokenProvider;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
@@ -42,8 +42,8 @@ class TeamControllerTest {
         headers.add("Authorization", "valid-token");
 
         List<Player> mockPlayers = Arrays.asList(
-                new Player("Player1", "10", "5", "3", "7.5"),
-                new Player("Player2", "15", "8", "6", "8.0")
+                new Player(),
+                new Player()
         );
 
         when(teamService.getTeamPlayers(teamName, country)).thenReturn(mockPlayers);

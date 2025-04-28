@@ -1,6 +1,6 @@
 package unq.dapp.grupoj.soccergenius.services.team;
 
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
 
 import java.util.List;
 

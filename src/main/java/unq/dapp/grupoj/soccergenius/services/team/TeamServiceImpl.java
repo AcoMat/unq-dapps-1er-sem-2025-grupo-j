@@ -3,7 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
 
 import java.util.List;
