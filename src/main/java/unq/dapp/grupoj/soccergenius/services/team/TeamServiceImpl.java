@@ -1,11 +1,10 @@
-package unq.dapp.grupoj.soccergenius.services.implementation;
+package unq.dapp.grupoj.soccergenius.services.team;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.Player;
-import unq.dapp.grupoj.soccergenius.services.TeamService;
-import unq.dapp.grupoj.soccergenius.services.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
 
 import java.util.List;
 

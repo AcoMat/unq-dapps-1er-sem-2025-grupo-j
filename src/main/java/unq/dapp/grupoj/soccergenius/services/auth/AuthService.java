@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.services.implementation;
+package unq.dapp.grupoj.soccergenius.services.auth;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

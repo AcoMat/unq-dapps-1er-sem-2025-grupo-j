@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import unq.dapp.grupoj.soccergenius.model.Player;
 import unq.dapp.grupoj.soccergenius.security.JwtTokenProvider;
-import unq.dapp.grupoj.soccergenius.services.TeamService;
+import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.Arrays;
 import java.util.List;

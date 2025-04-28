@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.services;
+package unq.dapp.grupoj.soccergenius.services.scrapping;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;

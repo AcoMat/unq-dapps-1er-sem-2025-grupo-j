@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unq.dapp.grupoj.soccergenius.model.Player;
 import unq.dapp.grupoj.soccergenius.security.JwtTokenProvider;
-import unq.dapp.grupoj.soccergenius.services.TeamService;
+import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.List;
 

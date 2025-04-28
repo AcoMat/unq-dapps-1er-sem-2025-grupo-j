@@ -10,7 +10,7 @@ import unq.dapp.grupoj.soccergenius.model.dtos.Auth.AuthResponse;
 import unq.dapp.grupoj.soccergenius.model.dtos.Auth.LoginCredentials;
 import unq.dapp.grupoj.soccergenius.model.dtos.Auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;
-import unq.dapp.grupoj.soccergenius.services.implementation.AuthService;
+import unq.dapp.grupoj.soccergenius.services.auth.AuthService;
 
 @RestController
 @RequestMapping("/auth")
