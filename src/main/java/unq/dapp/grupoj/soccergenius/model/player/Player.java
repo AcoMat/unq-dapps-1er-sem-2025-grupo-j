@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Player {
     @Id
-    private String id;
+    private int id;
 
     private String name;
     private int age;
@@ -34,5 +34,4 @@ public class Player {
     private ParticipationsHistorySumary history;
 
     private ZonedDateTime lastUpdate;
-
 }
