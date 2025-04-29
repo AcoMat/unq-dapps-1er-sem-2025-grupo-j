@@ -1,15 +1,19 @@
 package unq.dapp.grupoj.soccergenius.model.player;
 
 import jakarta.persistence.*;
+import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
 
-import java.util.List;
-
-@Entity
-public class ParticipationsHistorySumary {
+public class HistoricalParticipation {
     @Id
-    @OneToOne
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
+
+    @ManyToOne
     @JoinColumn(name = "player_id")
-    private Player player;
+    private HistoricalParticipationsSummary playerHistory;
+
+    private String season;
+    private String championshipName;
 
     //private int totalGamesPlayed;
     //private int totalMinsPLayed;
@@ -17,9 +21,6 @@ public class ParticipationsHistorySumary {
     //private int totalAssists;
     //private int totalYellowCards;
     //private int totalRedCards;
-
-    @OneToMany(mappedBy = "playerHistory")
-    private List<ChampionshipParticipationHistory> history;
 
     private int rating;
 }

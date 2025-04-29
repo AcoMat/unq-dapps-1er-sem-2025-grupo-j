@@ -1,16 +1,16 @@
 package unq.dapp.grupoj.soccergenius.model.player;
 
 import jakarta.persistence.*;
+import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
 
-@Entity
-public class ChampionshipParticipationHistory {
+public class CurrentParticipation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     @ManyToOne
     @JoinColumn(name = "player_id")
-    private ParticipationsHistorySumary playerHistory;
+    private HistoricalParticipationsSummary playerHistory;
 
     private String championshipName;
 

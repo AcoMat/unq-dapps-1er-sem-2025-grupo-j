@@ -79,12 +79,38 @@ public class WebScrapingService {
         String URL = BASE_URL + "/player/" + playerId;
         driver.navigate().to(URL);
 
-        WebElement spanElement = driver.findElement(By.xpath("//span[text()='Nombre: ']"));
-        WebElement playerNameDiv = spanElement.findElement(By.xpath("./..")); // Navigate to the parent div
-        String playerName = playerNameDiv.getText().replace("Nombre: ", "").trim();
-        //TODO: WIP
+        WebElement name_span = driver.findElement(By.xpath("//span[text()='Nombre: ']"));
+        WebElement player_name_div = name_span.findElement(By.xpath("./..")); // Navigate to the parent div
+        String playerName = player_name_div.getText().replace("Nombre: ", "").trim();
 
-        return new Player();
+        WebElement age_element = driver.findElement(By.xpath("//span[text()='Edad: ']/parent::div"));
+        String age_text = age_element.getText().replace("Edad: ", "").trim();
+        int playerAge = Integer.parseInt(age_text.split(" ")[0]);
+
+        String height_text = driver.findElement(By.xpath("//span[text()='Altura:']/parent::div")).getText();
+        String playerHeight = height_text.replace("Altura:", "").strip();
+
+        String nationality_text = driver.findElement(By.xpath("//span[text()='Nacionalidad:']/parent::div")).getText();
+        String playerNationality = nationality_text.replace("Nacionalidad:", "").strip();
+
+        List<String> playerPositions = new ArrayList<>();
+        WebElement positionsContainer = driver.findElement(By.xpath("//span[text()='Posiciones: ']/following-sibling::span"));
+        List<WebElement> positionElements = positionsContainer.findElements(By.xpath("./span"));
+        for (WebElement positionElement : positionElements) {
+            playerPositions.add(positionElement.getText().replace(",", "").trim());
+        }
+
+        WebElement team_element = driver.findElement(By.className("team-link"));
+        String playerActualTeam = team_element.getText();
+
+        return new Player(
+                playerId,
+                playerName,
+                playerAge,
+                playerNationality,
+                playerHeight,
+                playerPositions
+        );
     }
 
     public Team scrapTeamData(int teamId) {
@@ -109,7 +135,7 @@ public class WebScrapingService {
 
         driver.quit();
 
-        return new Team(teamId, teamName, leagueName, countryName);
+        return new Team(teamId, teamName, countryName, leagueName);
     }
 
 

@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.NotImplementedException;
 import unq.dapp.grupoj.soccergenius.model.Team;
+import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
+import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -29,9 +32,24 @@ public class Player {
     @JoinColumn(name = "actual_team_id")
     private Team actualTeam;
     @OneToOne(cascade = CascadeType.ALL)
-    private ParticipationsSumary actualParticipations;
+    private CurrentParticipationsSummary currentParticipationsSummary;
     @OneToOne(cascade = CascadeType.ALL)
-    private ParticipationsHistorySumary history;
+    private HistoricalParticipationsSummary history;
 
     private ZonedDateTime lastUpdate;
+
+    public Player(int id, String name, int age, String nationality, String height, List<String> positions) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.nationality = nationality;
+        this.height = height;
+        this.positions = positions;
+    }
+
+    public String getPerformanceIndex() {
+        //TODO
+
+        throw new NotImplementedException();
+    }
 }
