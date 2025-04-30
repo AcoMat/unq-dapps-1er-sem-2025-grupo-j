@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'unq.dapp.2025.1ercuatri.grupoj'
+group = 'unq.dapp.grupoj'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -17,26 +17,35 @@ repositories {
 	mavenCentral()
 }
 
+test {
+	useJUnitPlatform()
+}
+
 dependencies {
-	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.seleniumhq.selenium:selenium-java:4.11.0'
 	implementation 'io.github.bonigarcia:webdrivermanager:5.4.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
+	implementation("org.springframework.security:spring-security-crypto:6.4.4")
+	implementation 'com.auth0:java-jwt:4.5.0'
+	implementation("org.springframework.boot:spring-boot-starter-validation:3.4.4")
+
 	compileOnly "org.projectlombok:lombok:1.18.34"
 	annotationProcessor 'org.projectlombok:lombok:1.18.34'
 	testCompileOnly 'org.projectlombok:lombok:1.18.34'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.h2database:h2'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	//TESTING
+	testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.4")
 
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+	//logging
+	implementation("org.springframework.boot:spring-boot-starter-logging")
 
-tasks.named('test') {
-	useJUnitPlatform()
 }

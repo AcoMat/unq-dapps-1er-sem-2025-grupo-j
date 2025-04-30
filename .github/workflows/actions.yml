@@ -1,0 +1,63 @@
+# .github/workflows/actions.yml
+
+# Define el nombre del workflow. Este nombre aparecerá en la pestaña "Actions" de tu repositorio en GitHub.
+name: CI - Build and Test Spring Boot App with Gradle
+
+# Define los eventos que dispararán la ejecución de este workflow.
+on:
+  # Se ejecuta cuando se hace un 'push' (subida de código) a las ramas especificadas.
+  push:
+    # Lista de ramas que activarán el workflow en un 'push'. Aquí: 'main' y 'dev'.
+    branches: [ "main", "dev","pruebasgit" ]
+  # Se ejecuta cuando se crea o actualiza un 'pull request' dirigido a las ramas especificadas.
+  pull_request:
+    # Lista de ramas *destino* del pull request que activarán el workflow. Aquí: 'main' y 'dev'.
+    branches: [ "main", "dev" ]
+
+  # Permite ejecutar este workflow manualmente desde la interfaz de GitHub (pestaña Actions -> seleccionar workflow -> Run workflow).
+  workflow_dispatch:
+
+# Define uno o más trabajos (jobs) que se ejecutarán como parte del workflow. Los jobs pueden correr en paralelo por defecto.
+jobs:
+  # Define un job específico. 'build-and-test' es el identificador único de este job dentro del workflow.
+  build-and-test:
+    # Especifica el tipo de máquina virtual (runner) donde se ejecutará el job. 'ubuntu-latest' usa la última versión estable de Ubuntu ofrecida por GitHub.
+    runs-on: ubuntu-latest
+
+    # Define la secuencia de tareas (pasos) que se ejecutarán dentro de este job. Se ejecutan en orden.
+    steps:
+      # Paso 1: Descarga el código de tu repositorio.
+      # 'name' es una descripción legible del paso.
+      - name: Checkout repository
+        # 'uses' indica que este paso utiliza una "Action" predefinida. 'actions/checkout@v4' es la action oficial de GitHub para descargar el código fuente del repositorio en el runner.
+        uses: actions/checkout@v4
+
+      # Paso 2: Configura el entorno de Java (JDK).
+      - name: Set up JDK 21
+        # Utiliza la action 'actions/setup-java@v4' para instalar una versión específica del JDK.
+        uses: actions/setup-java@v4
+        # 'with' permite pasar parámetros a la action.
+        with:
+          # Especifica la versión de Java a instalar. Aquí es la '17'. Debes ajustarla a la que necesite tu proyecto.
+          java-version: '21'
+          # Especifica la distribución del JDK a usar. 'temurin' (antes AdoptOpenJDK) es una opción popular y recomendada.
+          distribution: 'temurin'
+          # Habilita el almacenamiento en caché de las dependencias de Gradle. Esto acelera las futuras ejecuciones del workflow al reutilizar las dependencias descargadas previamente.
+          cache: 'gradle'
+
+      # Paso 3: Otorga permisos de ejecución al script wrapper de Gradle.
+      # En entornos Linux/macOS (como el runner 'ubuntu-latest'), los scripts necesitan permiso de ejecución.
+      - name: Grant execute permission for gradlew
+        # 'run' ejecuta un comando directamente en la línea de comandos del runner. 'chmod +x gradlew' da permiso de ejecución al archivo 'gradlew'.
+        run: chmod +x gradlew
+
+      # Paso 4: Compila el proyecto y ejecuta los tests usando Gradle.
+      - name: Build and Test with Gradle
+        # Ejecuta el comando './gradlew build' usando el wrapper de Gradle. Este comando típicamente compila el código fuente, ejecuta los tests definidos en la tarea 'test', y ensambla los artefactos (como un archivo JAR o WAR).
+        run: ./gradlew build
+
+      # Comentarios indicando pasos opcionales que podrías añadir después, como subir reportes de tests, construir imágenes Docker o desplegar la aplicación.
+      # (Opcional) Puedes añadir más pasos aquí, como:
+      # - Subir artefactos de test (Jacoco, Surefire reports via Gradle plugins)
+      # - Construir una imagen Docker
+      # - Desplegar la aplicación
