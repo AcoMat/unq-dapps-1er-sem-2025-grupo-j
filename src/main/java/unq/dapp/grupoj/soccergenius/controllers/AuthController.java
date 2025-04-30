@@ -33,7 +33,6 @@ public class AuthController {
             logger.info("User registered successfully: {}", data.getEmail());
             return ResponseEntity.ok().header("Authorization", "Bearer " + newUser.getToken()).body(newUser.getUser());
         } catch (Exception e) {
-            logger.error("Registration failed for email {}: {}", data.getEmail(), e.getMessage(), e);
             throw new RegisterException(e.getMessage());
         }
     }
@@ -47,7 +46,6 @@ public class AuthController {
             logger.info("User logged in successfully: {}", credentials.getEmail());
             return ResponseEntity.ok().header("Authorization", "Bearer " + loggedUser.getToken()).body(loggedUser.getUser());
         } catch (Exception e) {
-            logger.error("Login failed for email {}: {}", credentials.getEmail(), e.getMessage(), e);
             throw new LoginException(e.getMessage());
         }
     }

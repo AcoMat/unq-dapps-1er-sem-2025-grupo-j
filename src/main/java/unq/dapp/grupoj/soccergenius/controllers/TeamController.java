@@ -31,11 +31,14 @@ public class TeamController {
     public ResponseEntity<List<Player>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country, @RequestHeader HttpHeaders header){
         jwtTokenProvider.validateToken(header.getFirst("Authorization"));
 
+        String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
+        String requestedCountry = country.replaceAll("[\n\r]", "_");
+
         long startTime = System.currentTimeMillis();
         logger.info("Request received to get players from a team");
 
         try {
-            List<Player> players = this.teamService.getTeamPlayers(teamName, country);
+            List<Player> players = this.teamService.getTeamPlayers(requestedTeamName, requestedCountry);
             long endTime = System.currentTimeMillis();
             logger.info("Successfully retrieved {} players for team in {} ms",
                     players.size(), (endTime - startTime));

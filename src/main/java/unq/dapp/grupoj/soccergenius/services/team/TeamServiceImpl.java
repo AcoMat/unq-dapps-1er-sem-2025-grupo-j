@@ -20,13 +20,17 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<Player> getTeamPlayers(String teamName, String country) {
-        logger.debug("Fetching players for team {} in country {}", teamName, country);
+
+        //TODO: abstract sanitization to a method
+        String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
+        String requestedCountry = country.replaceAll("[\n\r]", "_");
+
+        logger.debug("Fetching players for team {} in country {}", requestedTeamName, requestedCountry);
         try {
-            List<Player> players = this.webScrapingService.scrapeWebsite(teamName, country);
-            logger.debug("Retrieved {} players for team {}", players.size(), teamName);
+            List<Player> players = this.webScrapingService.scrapeWebsite(requestedTeamName, requestedCountry);
+            logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
         } catch (Exception e) {
-            logger.error("Error in TeamService while fetching players: {}", e.getMessage(), e);
             throw new ScrappingException(e.getMessage());
         }
     }
