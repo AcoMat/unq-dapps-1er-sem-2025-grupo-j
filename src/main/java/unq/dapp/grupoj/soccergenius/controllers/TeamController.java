@@ -44,9 +44,6 @@ public class TeamController {
                     players.size(), (endTime - startTime));
             return ResponseEntity.status(HttpStatus.OK).body(players);
         } catch (Exception e) {
-            long endTime = System.currentTimeMillis();
-            logger.error("Error fetching players for team: {} (execution time: {} ms)",
-                     e.getMessage(), (endTime - startTime), e);
             throw new ScrappingException(e.getMessage());
         }
     }
