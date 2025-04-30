@@ -3,6 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.Player;
 import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
 
@@ -26,7 +27,7 @@ public class TeamServiceImpl implements TeamService {
             return players;
         } catch (Exception e) {
             logger.error("Error in TeamService while fetching players: {}", e.getMessage(), e);
-            throw e;
+            throw new ScrappingException(e.getMessage());
         }
     }
 }

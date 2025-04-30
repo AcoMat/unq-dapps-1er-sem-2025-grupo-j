@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.model.dtos.Auth;
+package unq.dapp.grupoj.soccergenius.model.dtos.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
