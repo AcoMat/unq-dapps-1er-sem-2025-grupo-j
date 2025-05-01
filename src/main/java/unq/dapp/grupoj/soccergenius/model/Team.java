@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 public class Team {
+    private String id;
     private String name;
     private List<Player> playersList;
 }
