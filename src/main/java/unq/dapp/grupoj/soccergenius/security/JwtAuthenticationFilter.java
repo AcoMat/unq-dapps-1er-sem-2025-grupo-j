@@ -1,5 +1,7 @@
 package unq.dapp.grupoj.soccergenius.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +40,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            } catch (TokenExpiredException e) {
+                // Handle expired token specifically
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Token has expired. Please login again\"}");
+                return; // Stop filter chain
+            } catch (JWTVerificationException e) {
+                // Handle other JWT verification errors
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Invalid token\"}");
+                return; // Stop filter chain
             } catch (TokenVerificationException e) {
-                // Token is invalid, continue without authentication
+                // Handle custom token verification errors
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + e.getMessage() + "\"}");
+                return; // Stop filter chain
             }
         }
 
