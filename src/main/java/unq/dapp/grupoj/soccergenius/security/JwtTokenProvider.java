@@ -40,4 +40,11 @@ public class JwtTokenProvider {
             throw new TokenVerificationException("Token inválido o expirado");
         }
     }
+
+    public String getUserIdFromToken(String token) {
+        return JWT.require(algorithm)
+                .build()
+                .verify(token)
+                .getSubject();
+    }
 }

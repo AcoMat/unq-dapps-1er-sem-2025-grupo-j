@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import unq.dapp.grupoj.soccergenius.exceptions.AlreadyUsedEmail;
+import unq.dapp.grupoj.soccergenius.exceptions.LoginException;
+import unq.dapp.grupoj.soccergenius.exceptions.RegisterException;
 import unq.dapp.grupoj.soccergenius.exceptions.TokenVerificationException;
 
 import java.util.HashMap;
@@ -60,5 +62,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler({RegisterException.class, LoginException.class})
+    public ResponseEntity<Map<String, String>> handleAuthExceptions(Exception ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 }
