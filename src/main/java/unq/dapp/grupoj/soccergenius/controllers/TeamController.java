@@ -55,4 +55,11 @@ public class TeamController {
         List<MatchDTO> upcomingMatches = this.teamService.getUpcomingMatches(teamName);
         return ResponseEntity.status(HttpStatus.OK).body(upcomingMatches);
     }
+
+    @GetMapping("/comparison")
+    @Operation(summary = "Permite obtener métricas comparativas entre dos equipos")
+    public ResponseEntity<Object> getTeamComparison(@RequestParam String team1Id, @RequestParam String team2Id){
+        return ResponseEntity.ok(null);
+    }
+
 }
