@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     public void validateToken(String token) {
         try {
             if (token == null || token.trim().isEmpty()) {
-                throw new TokenVerificationException("Token no proporcionado");
+                throw new TokenVerificationException("Token not provided");
             }
 
             if (token.startsWith("Bearer ")) {
@@ -37,7 +37,7 @@ public class JwtTokenProvider {
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new TokenVerificationException("Token inválido o expirado");
+            throw new TokenVerificationException("Invalid or expired token");
         }
     }
 
