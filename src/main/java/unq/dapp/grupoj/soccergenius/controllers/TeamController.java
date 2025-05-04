@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
+import unq.dapp.grupoj.soccergenius.security.JwtTokenProvider;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.List;
@@ -41,4 +43,18 @@ public class TeamController {
             throw new ScrappingException(e.getMessage());
         }
     }
+
+    @GetMapping("/{teamName}/upcomingMatches")
+    @Operation(summary = "retorna un listado de los proximos partidos para el equipo seleccionado")
+    public ResponseEntity<List<MatchDTO>> getUpcomingMatches(@PathVariable String teamName){
+        List<MatchDTO> upcomingMatches = this.teamService.getUpcomingMatches(teamName);
+        return ResponseEntity.status(HttpStatus.OK).body(upcomingMatches);
+    }
+
+    @GetMapping("/comparison")
+    @Operation(summary = "Permite obtener métricas comparativas entre dos equipos")
+    public ResponseEntity<Object> getTeamComparison(@RequestParam String team1Id, @RequestParam String team2Id){
+        return ResponseEntity.ok(null);
+    }
+
 }
