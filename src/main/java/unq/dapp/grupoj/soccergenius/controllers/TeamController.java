@@ -3,7 +3,6 @@ package unq.dapp.grupoj.soccergenius.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,18 +19,13 @@ import java.util.List;
 public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
-    private final JwtTokenProvider jwtTokenProvider;
-
-    public TeamController(TeamService teamService, JwtTokenProvider jwtTokenProvider) {
+    public TeamController(TeamService teamService) {
         this.teamService = teamService;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @GetMapping("/{teamName}/{country}/players")
     @Operation(summary = "retorna información de los jugadores de un equipo, incluyendo nombre, partidos jugados, goles, asistencias y rating.")
-    public ResponseEntity<List<Player>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country, @RequestHeader HttpHeaders header){
-        jwtTokenProvider.validateToken(header.getFirst("Authorization"));
-
+    public ResponseEntity<List<Player>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country){
         String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
         String requestedCountry = country.replaceAll("[\n\r]", "_");
 
