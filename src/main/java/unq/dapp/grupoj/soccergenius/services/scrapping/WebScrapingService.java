@@ -11,6 +11,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
+import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class WebScrapingService {
     private static final String BASE_URL        = "https://es.whoscored.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
-    public List<Player> scrapeWebsite(String teamName, String country) {
+    public List<Player> getPlayersFromTeam(String teamName, String country) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
@@ -57,12 +59,12 @@ public class WebScrapingService {
 
             for (WebElement player : playerList2) {
                 String name        = player.findElement(By.className("player-link")).findElement(By.xpath("./*[2]")).getText();
-                String gamesPlayed = player.findElement(By.xpath("./*[5]")).getText();
-                String goals       = player.findElement(By.className("goal")).getText().equals("-") ? "0" : player.findElement(By.className("goal")).getText();
-                String assists     = player.findElement(By.className("assistTotal")).getText();
-                String rating      = player.findElement(By.xpath("./*[15]")).getText();
+                //String gamesPlayed = player.findElement(By.xpath("./*[5]")).getText();
+                //String goals       = player.findElement(By.className("goal")).getText().equals("-") ? "0" : player.findElement(By.className("goal")).getText();
+                //String assists     = player.findElement(By.className("assistTotal")).getText();
+                //String rating      = player.findElement(By.xpath("./*[15]")).getText();
 
-                //Player p = new Player(name,gamesPlayed,goals,assists,rating);
+                //TODO: FIX THIS
                 Player p = new Player();
                 scrapedData.add(p);
             }
@@ -112,6 +114,37 @@ public class WebScrapingService {
                 playerPositions
         );
     }
+
+    public CurrentParticipationsSummary getCurrentParticipationInfo(Player player) {
+        String URL = BASE_URL + "/player/" + player.getId();
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        try {
+            driver.navigate().to(URL);
+
+            // Wait for the table to load
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
+
+            // Get the last row (Total/Promedio)
+            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
+
+            // Get the rating cell (last cell in the row)
+            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
+            String ratingText = ratingCell.getText();
+
+            double rating = Double.parseDouble(ratingText);
+
+            return new CurrentParticipationsSummary(player, rating);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            driver.quit();
+        }
+    }
+
 
     public Team scrapTeamData(int teamId) {
         WebDriverManager.chromedriver().setup();

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import unq.dapp.grupoj.soccergenius.exceptions.AlreadyUsedEmail;
 import unq.dapp.grupoj.soccergenius.exceptions.TokenVerificationException;
+import unq.dapp.grupoj.soccergenius.exceptions.WrongCredentialsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,4 +62,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
+
+    @ExceptionHandler(WrongCredentialsException.class)
+    public ResponseEntity<String> handleWrongCredentials(WrongCredentialsException ex) {
+        logger.error("Wrong credentials exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
 }

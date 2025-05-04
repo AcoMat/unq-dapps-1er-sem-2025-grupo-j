@@ -1,8 +1,6 @@
 package unq.dapp.grupoj.soccergenius.services.player;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
-import unq.dapp.grupoj.soccergenius.model.dtos.PlayerPerformanceDto;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.repository.PlayerRepository;
 import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
@@ -23,9 +21,9 @@ public class PlayerService {
                 .orElseGet(() -> _webScrapingService.scrapPlayerData(playerId));
     }
 
-    public PlayerPerformanceDto getPlayerPerformance(int playerId) {
-
-
-        throw new NotImplementedException();
+    public String getPlayerPerformance(int playerId) {
+        Player player = _playerRepository.findById(playerId)
+                .orElseGet(() -> _webScrapingService.scrapPlayerData(playerId));
+        return player.getPerformanceAndTendency();
     }
 }

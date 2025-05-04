@@ -30,7 +30,7 @@ public class TeamServiceImpl implements TeamService {
     public List<Player> getTeamPlayers(String teamName, String country) {
         logger.debug("Fetching players for team {} in country {}", teamName, country);
         try {
-            List<Player> players = this.webScrapingService.scrapeWebsite(teamName, country);
+            List<Player> players = this.webScrapingService.getPlayersFromTeam(teamName, country);
             logger.debug("Retrieved {} players for team {}", players.size(), teamName);
             return players;
         } catch (Exception e) {

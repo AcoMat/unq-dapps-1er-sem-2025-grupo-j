@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.lang3.NotImplementedException;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
 import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
@@ -47,9 +46,10 @@ public class Player {
         this.positions = positions;
     }
 
-    public String getPerformanceIndex() {
-        //TODO
+    public String getPerformanceAndTendency() {
+        double actualRating = this.currentParticipationsSummary.getRating();
+        double historicalRatingAverage = this.history.getRating();
 
-        throw new NotImplementedException();
+        return this.name + " has a current performance index of " + actualRating + " and a tendency of " + (actualRating - historicalRatingAverage) + " compared to the historical average.";
     }
 }

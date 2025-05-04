@@ -3,6 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.auth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.exceptions.AlreadyUsedEmail;
+import unq.dapp.grupoj.soccergenius.exceptions.WrongCredentialsException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.dtos.Auth.AuthResponse;
 import unq.dapp.grupoj.soccergenius.model.dtos.Auth.LoginCredentials;
@@ -43,7 +44,7 @@ public class AuthService {
     public AuthResponse login(LoginCredentials credentials){
         AppUser appUser = usersRepository.findByEmail(credentials.getEmail());
         if (appUser == null || !passwordEncoder.matches(credentials.getPassword(), appUser.getPassword())) {
-            throw new IllegalArgumentException("Email or password is incorrect");
+            throw new WrongCredentialsException("Email or password is incorrect");
         }
 
         return new AuthResponse(mapper.toDTO(appUser), jwtTokenProvider.generateToken(appUser.getId()));

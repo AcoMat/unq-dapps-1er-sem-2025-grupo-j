@@ -4,9 +4,9 @@ package unq.dapp.grupoj.soccergenius.controllers;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import unq.dapp.grupoj.soccergenius.model.dtos.PlayerPerformanceDto;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 
 import java.util.logging.Logger;
@@ -23,10 +23,9 @@ public class PlayerController {
     }
 
     @GetMapping("/performance/{playerId}")
-    public ResponseEntity<PlayerPerformanceDto> getPlayerPerformance(Long playerId) {
+    public ResponseEntity<String> getPlayerPerformance(@PathVariable int playerId) {
         //TODO
-        PlayerPerformanceDto playerPerformance = _playerService.getPlayerPerformance(playerId);
-
+        String performance = _playerService.getPlayerPerformance(playerId);
         throw new NotImplementedException();
     }
 }
