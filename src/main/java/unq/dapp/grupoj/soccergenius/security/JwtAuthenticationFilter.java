@@ -30,6 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromRequest(request);
 
+        String jsonType = "application/json;charset=UTF-8";
+
         if (token != null) {
             try {
                 jwtTokenProvider.validateToken(token);
@@ -43,19 +45,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (TokenExpiredException e) {
                 // Handle expired token specifically
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
+                response.setContentType(jsonType);
                 response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Token has expired. Please login again\"}");
                 return; // Stop filter chain
             } catch (JWTVerificationException e) {
                 // Handle other JWT verification errors
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
+                response.setContentType(jsonType);
                 response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Invalid token\"}");
                 return; // Stop filter chain
             } catch (TokenVerificationException e) {
                 // Handle custom token verification errors
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
+                response.setContentType(jsonType);
                 response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + e.getMessage() + "\"}");
                 return; // Stop filter chain
             }

@@ -19,7 +19,6 @@ import java.util.List;
 public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
-
     public TeamController(TeamService teamService) {
         this.teamService = teamService;
     }
