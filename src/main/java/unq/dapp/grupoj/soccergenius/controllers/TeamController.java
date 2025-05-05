@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
+import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.List;
@@ -55,7 +58,7 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}")
-    public ResponseEntity<TeamDto> getTeam(@PathVariable int teamId) {
+    public ResponseEntity<TeamDto> getTeam(@PathVariable String teamId) {
         logger.info("Request received to get all teams");
         TeamDto team = this.teamService.getTeamFromLaLiga(teamId);
         return ResponseEntity.status(HttpStatus.OK).body(team);

@@ -26,6 +26,6 @@ public class PlayerController {
     public ResponseEntity<String> getPlayerPerformance(@PathVariable int playerId) {
         //TODO
         String performance = _playerService.getPlayerPerformance(playerId);
-        throw new NotImplementedException();
+        return ResponseEntity.ok(performance);
     }
 }

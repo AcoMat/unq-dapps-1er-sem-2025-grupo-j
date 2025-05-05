@@ -11,8 +11,6 @@ import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-import unq.dapp.grupoj.soccergenius.model.Player;
-import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
@@ -30,8 +28,7 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final Mapper mapper;
 
-    public TeamServiceImpl(WebScrapingService webScrapingService, RestTemplate restTemplate) {
-    public TeamServiceImpl(WebScrapingService webScrapingService, TeamRepository teamRepository, Mapper mapper) {
+    public TeamServiceImpl(WebScrapingService webScrapingService, TeamRepository teamRepository, Mapper mapper, RestTemplate restTemplate) {
         this.webScrapingService = webScrapingService;
         this.restTemplate = restTemplate;
         this.teamRepository = teamRepository;
@@ -47,7 +44,7 @@ public class TeamServiceImpl implements TeamService {
 
         logger.debug("Fetching players for team {} in country {}", requestedTeamName, requestedCountry);
         try {
-            List<Player> players = this.webScrapingService.scrapeWebsite(requestedTeamName, requestedCountry);
+            List<Player> players = this.webScrapingService.getPlayersFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
         } catch (Exception e) {
@@ -107,7 +104,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamDto getTeamFromLaLiga(int teamId) {
+    public TeamDto getTeamFromLaLiga(String teamId) {
         logger.debug("Searching team in DB {} from La Liga", teamId);
         Team dbTeam = this.teamRepository.findById(teamId).orElse(null);
         if (dbTeam != null) {

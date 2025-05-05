@@ -2,7 +2,6 @@ package unq.dapp.grupoj.soccergenius.mappers;
 
 import org.springframework.stereotype.Component;
 import unq.dapp.grupoj.soccergenius.model.Team;
-import unq.dapp.grupoj.soccergenius.model.dtos.Auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;

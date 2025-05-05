@@ -146,7 +146,7 @@ public class WebScrapingService {
     }
 
 
-    public Team scrapTeamData(int teamId) {
+    public Team scrapTeamData(String teamId) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
