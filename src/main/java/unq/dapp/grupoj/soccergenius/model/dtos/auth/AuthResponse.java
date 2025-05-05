@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.model.dtos.Auth;
+package unq.dapp.grupoj.soccergenius.model.dtos.auth;
 
 import lombok.Getter;
 import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;

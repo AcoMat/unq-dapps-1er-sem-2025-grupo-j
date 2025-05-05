@@ -12,10 +12,9 @@ import unq.dapp.grupoj.soccergenius.model.player.Player;
 import java.util.List;
 
 @ToString
-@Getter
 @Entity
 @NoArgsConstructor
-public class Team {
+@Getter public class Team {
     @Id
     private int id;
     private String name;

@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unq.dapp.grupoj.soccergenius.model.dtos.Auth.AuthResponse;
-import unq.dapp.grupoj.soccergenius.model.dtos.Auth.LoginCredentials;
-import unq.dapp.grupoj.soccergenius.model.dtos.Auth.RegisterFormDTO;
+import unq.dapp.grupoj.soccergenius.exceptions.LoginException;
+import unq.dapp.grupoj.soccergenius.exceptions.RegisterException;
+import unq.dapp.grupoj.soccergenius.model.dtos.auth.AuthResponse;
+import unq.dapp.grupoj.soccergenius.model.dtos.auth.LoginCredentials;
+import unq.dapp.grupoj.soccergenius.model.dtos.auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;
 import unq.dapp.grupoj.soccergenius.services.auth.AuthService;
 
@@ -31,8 +33,7 @@ public class AuthController {
             logger.info("User registered successfully: {}", data.getEmail());
             return ResponseEntity.ok().header("Authorization", "Bearer " + newUser.getToken()).body(newUser.getUser());
         } catch (Exception e) {
-            logger.error("Registration failed for email {}: {}", data.getEmail(), e.getMessage(), e);
-            throw e;
+            throw new RegisterException(e.getMessage());
         }
     }
 
@@ -45,8 +46,7 @@ public class AuthController {
             logger.info("User logged in successfully: {}", credentials.getEmail());
             return ResponseEntity.ok().header("Authorization", "Bearer " + loggedUser.getToken()).body(loggedUser.getUser());
         } catch (Exception e) {
-            logger.error("Login failed for email {}: {}", credentials.getEmail(), e.getMessage(), e);
-            throw e;
+            throw new LoginException(e.getMessage());
         }
     }
 }

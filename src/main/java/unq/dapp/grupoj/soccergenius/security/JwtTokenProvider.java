@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
 
     private static final String JWT_SECRET_KEY_SOCCERGENIUS = System.getenv("JWT_SECRET_KEY_SOCCERGENIUS");
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1 hora
     private static final Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY_SOCCERGENIUS);
 
     public String generateToken(Long id) {
@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     public void validateToken(String token) {
         try {
             if (token == null || token.trim().isEmpty()) {
-                throw new TokenVerificationException("Token no proporcionado");
+                throw new TokenVerificationException("Token not provided");
             }
 
             if (token.startsWith("Bearer ")) {
@@ -37,7 +37,14 @@ public class JwtTokenProvider {
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new TokenVerificationException("Token inválido o expirado");
+            throw new TokenVerificationException("Invalid or expired token");
         }
+    }
+
+    public String getUserIdFromToken(String token) {
+        return JWT.require(algorithm)
+                .build()
+                .verify(token)
+                .getSubject();
     }
 }
