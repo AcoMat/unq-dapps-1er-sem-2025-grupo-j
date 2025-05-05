@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
-import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
+import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
 
 import java.util.List;
@@ -23,20 +23,29 @@ import java.util.stream.Collectors;
 public class TeamServiceImpl implements TeamService {
 
     private static final Logger logger = LoggerFactory.getLogger(TeamServiceImpl.class);
+
     private final WebScrapingService webScrapingService;
+    private final PlayerService playerService;
+
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
     private final Mapper mapper;
 
-    public TeamServiceImpl(WebScrapingService webScrapingService, TeamRepository teamRepository, Mapper mapper, RestTemplate restTemplate) {
+    public TeamServiceImpl
+            (WebScrapingService webScrapingService,
+             TeamRepository teamRepository,
+             Mapper mapper,
+             RestTemplate restTemplate,
+             PlayerService playerService) {
         this.webScrapingService = webScrapingService;
         this.restTemplate = restTemplate;
         this.teamRepository = teamRepository;
         this.mapper = mapper;
+        this.playerService = playerService;
     }
 
     @Override
-    public List<Player> getTeamPlayers(String teamName, String country) {
+    public List<String> getTeamPlayers(String teamName, String country) {
 
         //TODO: abstract sanitization to a method
         String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
@@ -44,7 +53,7 @@ public class TeamServiceImpl implements TeamService {
 
         logger.debug("Fetching players for team {} in country {}", requestedTeamName, requestedCountry);
         try {
-            List<Player> players = this.webScrapingService.getPlayersFromTeam(requestedTeamName, requestedCountry);
+            List<String> players = this.webScrapingService.getPlayersIdsFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
         } catch (Exception e) {

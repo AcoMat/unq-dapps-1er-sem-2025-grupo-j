@@ -24,7 +24,7 @@ public class WebScrapingService {
     private static final String BASE_URL        = "https://es.whoscored.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
-    public List<Player> getPlayersFromTeam(String teamName, String country) {
+    public List<String> getPlayersIdsFromTeam(String teamName, String country) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
@@ -56,24 +56,20 @@ public class WebScrapingService {
             driver.navigate().to(teamUrl);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("player-table-statistics-body")));
+
             WebElement playerList = driver.findElement(By.id("player-table-statistics-body"));
-            List<WebElement> playerList2 = playerList.findElements(By.xpath("./*"));
+            List<WebElement> playerRows = playerList.findElements(By.xpath("./*"));
 
-            for (WebElement player : playerList2) {
-                String name        = player.findElement(By.className("player-link")).findElement(By.xpath("./*[2]")).getText();
-                //String gamesPlayed = player.findElement(By.xpath("./*[5]")).getText();
-                //String goals       = player.findElement(By.className("goal")).getText().equals("-") ? "0" : player.findElement(By.className("goal")).getText();
-                //String assists     = player.findElement(By.className("assistTotal")).getText();
-                //String rating      = player.findElement(By.xpath("./*[15]")).getText();
-
-                //TODO: FIX THIS
-                Player p = new Player();
-                scrapedData.add(p);
+            List<String> players = new ArrayList<>();
+            for (WebElement player : playerRows) {
+                WebElement playerLink = player.findElement(By.className("player-link"));
+                players.add(playerLink.findElement(By.xpath("./*[2]")).getText());
             }
+
+            return players;
         } finally {
             driver.quit();
         }
-        return scrapedData;
     }
 
     public Player scrapPlayerData(int playerId) {
@@ -143,7 +139,7 @@ public class WebScrapingService {
             driver.navigate().to(URL);
 
             // Wait for the table to load
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
 
             // Get the last row (Total/Promedio)
@@ -170,7 +166,7 @@ public class WebScrapingService {
 
         try{
             driver.navigate().to(URL);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
 
             // Get the last row (Total/Promedio)
