@@ -17,13 +17,25 @@ public class PlayerService {
     }
 
     public Player getPlayer(int playerId) {
-        return _playerRepository.findById(playerId)
-                .orElseGet(() -> _webScrapingService.scrapPlayerData(playerId));
+        //TODO: check last update and refesh data
+        Player player = _playerRepository.findById(playerId).orElse(null);
+        if (player == null) {
+            player = _webScrapingService.scrapPlayerData(playerId);
+            if (player == null) {
+                return null;
+            }
+            player.setCurrentParticipationsSummary(_webScrapingService.getCurrentParticipationInfo(player));
+            player.setHistory(_webScrapingService.getHistoryInfo(player));
+            _playerRepository.save(player);
+        }
+        return player;
     }
 
     public String getPlayerPerformance(int playerId) {
-        Player player = _playerRepository.findById(playerId)
-                .orElseGet(() -> _webScrapingService.scrapPlayerData(playerId));
+        Player player = this.getPlayer(playerId);
+        if(player == null) {
+            return "Player not found";
+        }
         return player.getPerformanceAndTendency();
     }
 }

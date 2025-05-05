@@ -9,9 +9,11 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
+import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
+import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -78,29 +80,40 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String URL = BASE_URL + "/player/" + playerId;
+        String URL = BASE_URL + "/players/" + playerId;
+        try{
+
         driver.navigate().to(URL);
 
-        WebElement name_span = driver.findElement(By.xpath("//span[text()='Nombre: ']"));
-        WebElement player_name_div = name_span.findElement(By.xpath("./..")); // Navigate to the parent div
-        String playerName = player_name_div.getText().replace("Nombre: ", "").trim();
-
-        WebElement age_element = driver.findElement(By.xpath("//span[text()='Edad: ']/parent::div"));
-        String age_text = age_element.getText().replace("Edad: ", "").trim();
-        int playerAge = Integer.parseInt(age_text.split(" ")[0]);
-
-        String height_text = driver.findElement(By.xpath("//span[text()='Altura:']/parent::div")).getText();
-        String playerHeight = height_text.replace("Altura:", "").strip();
-
-        String nationality_text = driver.findElement(By.xpath("//span[text()='Nacionalidad:']/parent::div")).getText();
-        String playerNationality = nationality_text.replace("Nacionalidad:", "").strip();
-
-        List<String> playerPositions = new ArrayList<>();
-        WebElement positionsContainer = driver.findElement(By.xpath("//span[text()='Posiciones: ']/following-sibling::span"));
-        List<WebElement> positionElements = positionsContainer.findElements(By.xpath("./span"));
-        for (WebElement positionElement : positionElements) {
-            playerPositions.add(positionElement.getText().replace(",", "").trim());
+        List<WebElement> errorMessages = driver.findElements(
+                By.xpath("//*[contains(text(), 'The page you requested does not exist')]"));
+        if (!errorMessages.isEmpty()) {
+            // Page doesn't exist, return null
+            return null;
         }
+
+        WebElement nameContainer = driver.findElement(By.xpath("//span[contains(text(),'Nombre: ')]/parent::div"));
+        String playerName = nameContainer.getText().replace("Nombre: ", "").trim();
+
+        WebElement ageElement = driver.findElement(By.xpath("//span[contains(text(),'Edad: ')]/parent::div"));
+        String ageText = ageElement.getText().replace("Edad: ", "").trim();
+        int playerAge = Integer.parseInt(ageText.split(" ")[0]);
+
+        // Extract nationality - get just the country name without the icon
+        WebElement nationalityElement = driver.findElement(By.xpath("//span[contains(text(),'Nacionalidad:')]/parent::div"));
+        WebElement countryElement = nationalityElement.findElement(By.className("iconize-icon-left"));
+        String playerNationality = countryElement.getText().split(" ")[0].trim();
+
+        // Extract positions
+        List<String> playerPositions = new ArrayList<>();
+        WebElement positionsDiv = driver.findElement(By.xpath("//span[contains(text(),'Posiciones: ')]/parent::div"));
+        List<WebElement> positionSpans = positionsDiv.findElements(By.xpath(".//span[@style='display: inline-block;']"));
+        for (WebElement position : positionSpans) {
+            playerPositions.add(position.getText().trim());
+        }
+
+        String height_text = driver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div")).getText();
+        String playerHeight = height_text.replace("Altura:", "").strip();
 
         WebElement team_element = driver.findElement(By.className("team-link"));
         String playerActualTeam = team_element.getText();
@@ -113,10 +126,15 @@ public class WebScrapingService {
                 playerHeight,
                 playerPositions
         );
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping player data: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
     }
 
     public CurrentParticipationsSummary getCurrentParticipationInfo(Player player) {
-        String URL = BASE_URL + "/player/" + player.getId();
+        String URL = BASE_URL + "/players/" + player.getId();
 
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
@@ -139,7 +157,34 @@ public class WebScrapingService {
 
             return new CurrentParticipationsSummary(player, rating);
         } catch (Exception e) {
-            return null;
+            throw new ScrappingException("Error scraping player participation info: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public HistoricalParticipationsSummary getHistoryInfo(Player player) {
+        String URL = BASE_URL + "/players/" + player.getId() + "/history";
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        try{
+            driver.navigate().to(URL);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
+
+            // Get the last row (Total/Promedio)
+            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
+
+            // Get the rating cell (last cell in the row)
+            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
+            String ratingText = ratingCell.getText();
+
+            double rating = Double.parseDouble(ratingText);
+
+            return new HistoricalParticipationsSummary(player, rating);
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping player history info: " + e.getMessage());
         } finally {
             driver.quit();
         }
@@ -171,7 +216,6 @@ public class WebScrapingService {
         return new Team(teamId, teamName, countryName, leagueName);
     }
 
-
     private WebDriver createWebDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new"); // Modo headless moderno
@@ -182,4 +226,5 @@ public class WebScrapingService {
         options.addArguments("user-agent=" + USER_AGENT); // Usar constante
         return new ChromeDriver(options);
     }
+
 }

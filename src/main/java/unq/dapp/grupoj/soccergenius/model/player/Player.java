@@ -1,9 +1,10 @@
 package unq.dapp.grupoj.soccergenius.model.player;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
@@ -13,7 +14,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @ToString
-@Setter
 @Getter
 @Entity
 @NoArgsConstructor
@@ -29,10 +29,15 @@ public class Player {
 
     @ManyToOne
     @JoinColumn(name = "actual_team_id")
+    @JsonManagedReference
     private Team actualTeam;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private CurrentParticipationsSummary currentParticipationsSummary;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(mappedBy = "player", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private HistoricalParticipationsSummary history;
 
     private ZonedDateTime lastUpdate;
@@ -44,8 +49,30 @@ public class Player {
         this.nationality = nationality;
         this.height = height;
         this.positions = positions;
+        this.lastUpdate = ZonedDateTime.now();
     }
 
+    public void setAge(int age) {
+        this.age = age;
+        this.lastUpdate = ZonedDateTime.now();
+    }
+
+    public void setActualTeam(Team actualTeam) {
+        this.actualTeam = actualTeam;
+        this.lastUpdate = ZonedDateTime.now();
+    }
+
+    public void setCurrentParticipationsSummary(CurrentParticipationsSummary currentParticipationsSummary) {
+        this.currentParticipationsSummary = currentParticipationsSummary;
+        this.lastUpdate = ZonedDateTime.now();
+    }
+
+    public void setHistory(HistoricalParticipationsSummary history) {
+        this.history = history;
+        this.lastUpdate = ZonedDateTime.now();
+    }
+
+    @JsonIgnore
     public String getPerformanceAndTendency() {
         double actualRating = this.currentParticipationsSummary.getRating();
         double historicalRatingAverage = this.history.getRating();
