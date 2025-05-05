@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unq.dapp.grupoj.soccergenius.exceptions.LoginException;
 import unq.dapp.grupoj.soccergenius.exceptions.RegisterException;
+import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.auth.AuthResponse;
 import unq.dapp.grupoj.soccergenius.model.dtos.auth.LoginCredentials;
 import unq.dapp.grupoj.soccergenius.model.dtos.auth.RegisterFormDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.UserDTO;
 import unq.dapp.grupoj.soccergenius.services.auth.AuthService;
 
 @RestController

@@ -9,24 +9,29 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
-import unq.dapp.grupoj.soccergenius.model.Player;
+import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.model.Team;
+import unq.dapp.grupoj.soccergenius.model.player.Player;
+import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
+import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class WebScrapingService {
-    private static final String URL        = "https://es.whoscored.com/search/?t=";
+    private static final String BASE_URL        = "https://es.whoscored.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
-    public List<Player> scrapeWebsite(String teamName, String country) {
+    public List<String> getPlayersIdsFromTeam(String teamName, String country) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
         List<Player> scrapedData = new ArrayList<>();
 
         try {
-            String urlTMP = URL + teamName;
+            String urlTMP = BASE_URL + "/search/?t=" + teamName;
             driver.navigate().to(urlTMP);
 
             WebElement divResult = driver.findElement(By.className("search-result"));
@@ -51,23 +56,160 @@ public class WebScrapingService {
             driver.navigate().to(teamUrl);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("player-table-statistics-body")));
+
             WebElement playerList = driver.findElement(By.id("player-table-statistics-body"));
-            List<WebElement> playerList2 = playerList.findElements(By.xpath("./*"));
+            List<WebElement> playerRows = playerList.findElements(By.xpath("./*"));
 
-            for (WebElement player : playerList2) {
-                String name        = player.findElement(By.className("player-link")).findElement(By.xpath("./*[2]")).getText();
-                String gamesPlayed = player.findElement(By.xpath("./*[5]")).getText();
-                String goals       = player.findElement(By.className("goal")).getText().equals("-") ? "0" : player.findElement(By.className("goal")).getText();
-                String assists     = player.findElement(By.className("assistTotal")).getText();
-                String rating      = player.findElement(By.xpath("./*[15]")).getText();
-
-                Player p = new Player(name,gamesPlayed,goals,assists,rating);
-                scrapedData.add(p);
+            List<String> players = new ArrayList<>();
+            for (WebElement player : playerRows) {
+                WebElement playerLink = player.findElement(By.className("player-link"));
+                players.add(playerLink.findElement(By.xpath("./*[2]")).getText());
             }
+
+            return players;
         } finally {
             driver.quit();
         }
-        return scrapedData;
+    }
+
+    public Player scrapPlayerData(int playerId) {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        String URL = BASE_URL + "/players/" + playerId;
+        try{
+
+        driver.navigate().to(URL);
+
+        List<WebElement> errorMessages = driver.findElements(
+                By.xpath("//*[contains(text(), 'The page you requested does not exist')]"));
+        if (!errorMessages.isEmpty()) {
+            // Page doesn't exist, return null
+            return null;
+        }
+
+        WebElement nameContainer = driver.findElement(By.xpath("//span[contains(text(),'Nombre: ')]/parent::div"));
+        String playerName = nameContainer.getText().replace("Nombre: ", "").trim();
+
+        WebElement ageElement = driver.findElement(By.xpath("//span[contains(text(),'Edad: ')]/parent::div"));
+        String ageText = ageElement.getText().replace("Edad: ", "").trim();
+        int playerAge = Integer.parseInt(ageText.split(" ")[0]);
+
+        // Extract nationality - get just the country name without the icon
+        WebElement nationalityElement = driver.findElement(By.xpath("//span[contains(text(),'Nacionalidad:')]/parent::div"));
+        WebElement countryElement = nationalityElement.findElement(By.className("iconize-icon-left"));
+        String playerNationality = countryElement.getText().split(" ")[0].trim();
+
+        // Extract positions
+        List<String> playerPositions = new ArrayList<>();
+        WebElement positionsDiv = driver.findElement(By.xpath("//span[contains(text(),'Posiciones: ')]/parent::div"));
+        List<WebElement> positionSpans = positionsDiv.findElements(By.xpath(".//span[@style='display: inline-block;']"));
+        for (WebElement position : positionSpans) {
+            playerPositions.add(position.getText().trim());
+        }
+
+        String height_text = driver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div")).getText();
+        String playerHeight = height_text.replace("Altura:", "").strip();
+
+        WebElement team_element = driver.findElement(By.className("team-link"));
+        String playerActualTeam = team_element.getText();
+
+        return new Player(
+                playerId,
+                playerName,
+                playerAge,
+                playerNationality,
+                playerHeight,
+                playerPositions
+        );
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping player data: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public CurrentParticipationsSummary getCurrentParticipationInfo(Player player) {
+        String URL = BASE_URL + "/players/" + player.getId();
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        try {
+            driver.navigate().to(URL);
+
+            // Wait for the table to load
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
+
+            // Get the last row (Total/Promedio)
+            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
+
+            // Get the rating cell (last cell in the row)
+            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
+            String ratingText = ratingCell.getText();
+
+            double rating = Double.parseDouble(ratingText);
+
+            return new CurrentParticipationsSummary(player, rating);
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping player participation info: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public HistoricalParticipationsSummary getHistoryInfo(Player player) {
+        String URL = BASE_URL + "/players/" + player.getId() + "/history";
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        try{
+            driver.navigate().to(URL);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
+
+            // Get the last row (Total/Promedio)
+            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
+
+            // Get the rating cell (last cell in the row)
+            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
+            String ratingText = ratingCell.getText();
+
+            double rating = Double.parseDouble(ratingText);
+
+            return new HistoricalParticipationsSummary(player, rating);
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping player history info: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+
+    public Team scrapTeamData(String teamId) {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        String teamName;
+        String leagueName;
+        String countryName;
+
+        String URL = BASE_URL + "/teams/" + teamId;
+        driver.navigate().to(URL);
+
+        WebElement teamNameSpan = driver.findElement(By.className("team-header-name"));
+        teamName = teamNameSpan.getText();
+
+        WebElement leagueHref = driver.findElement(By.cssSelector("#breadcrumb-nav a"));
+        leagueName = leagueHref.getText();
+
+        WebElement countrySpan = driver.findElement(By.cssSelector(".iconize.iconize-icon-left"));
+        countryName = countrySpan.getText();
+
+        driver.quit();
+
+        return new Team(teamId, teamName, countryName, leagueName);
     }
 
     private WebDriver createWebDriver() {
@@ -80,4 +222,5 @@ public class WebScrapingService {
         options.addArguments("user-agent=" + USER_AGENT); // Usar constante
         return new ChromeDriver(options);
     }
+
 }

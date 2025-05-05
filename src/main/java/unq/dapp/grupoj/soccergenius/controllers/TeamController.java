@@ -7,9 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-import unq.dapp.grupoj.soccergenius.model.Player;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
-import unq.dapp.grupoj.soccergenius.security.JwtTokenProvider;
+import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class TeamController {
 
     @GetMapping("/{teamName}/{country}/players")
     @Operation(summary = "retorna información de los jugadores de un equipo, incluyendo nombre, partidos jugados, goles, asistencias y rating.")
-    public ResponseEntity<List<Player>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country){
+    public ResponseEntity<List<String>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country){
         String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
         String requestedCountry = country.replaceAll("[\n\r]", "_");
 
@@ -33,7 +32,7 @@ public class TeamController {
         logger.info("Request received to get players from a team");
 
         try {
-            List<Player> players = this.teamService.getTeamPlayers(requestedTeamName, requestedCountry);
+            List<String> players = this.teamService.getTeamPlayers(requestedTeamName, requestedCountry);
             long endTime = System.currentTimeMillis();
             logger.info("Successfully retrieved {} players for team in {} ms",
                     players.size(), (endTime - startTime));
@@ -56,4 +55,10 @@ public class TeamController {
         return ResponseEntity.ok(null);
     }
 
+    @GetMapping("/{teamId}")
+    public ResponseEntity<TeamDto> getTeam(@PathVariable String teamId) {
+        logger.info("Request received to get all teams");
+        TeamDto team = this.teamService.getTeamFromLaLiga(teamId);
+        return ResponseEntity.status(HttpStatus.OK).body(team);
+    }
 }

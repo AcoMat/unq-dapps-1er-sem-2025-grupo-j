@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import unq.dapp.grupoj.soccergenius.exceptions.AlreadyUsedEmail;
-import unq.dapp.grupoj.soccergenius.exceptions.LoginException;
-import unq.dapp.grupoj.soccergenius.exceptions.RegisterException;
-import unq.dapp.grupoj.soccergenius.exceptions.TokenVerificationException;
+import unq.dapp.grupoj.soccergenius.exceptions.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,4 +67,24 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", ex.getMessage());
         return ResponseEntity.badRequest().body(errorResponse);
     }
+
+    @ExceptionHandler(WrongCredentialsException.class)
+    public ResponseEntity<String> handleWrongCredentials(WrongCredentialsException ex) {
+        logger.error("Wrong credentials exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+
+    @ExceptionHandler(ScrappingException.class)
+    public ResponseEntity<String> handleScrappingException(ScrappingException ex) {
+        logger.error("Scraping exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+    }
+
 }
