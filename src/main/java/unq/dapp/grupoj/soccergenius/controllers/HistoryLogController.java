@@ -21,7 +21,7 @@ public class HistoryLogController {
     }
 
     @GetMapping
-    @Operation(summary = "Almacena y permite consultar las solicitudes de rendimiento, predicciones y comparaciones realizadas.")
+    @Operation(summary = "Stores and allows querying of performance requests, predictions and comparisons made.")
     public ResponseEntity<List<HistoryLog>> getHistoryLogs(){
         List<HistoryLog> historyLogList = historyLogService.getHistoryLogs();
 

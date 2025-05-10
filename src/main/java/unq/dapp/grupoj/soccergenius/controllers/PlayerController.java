@@ -1,5 +1,6 @@
 package unq.dapp.grupoj.soccergenius.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,12 +23,14 @@ public class PlayerController {
     }
 
     @GetMapping("/performance/{playerId}")
+    @Operation(summary = "Returns the performance index and tendency of a player")
     public ResponseEntity<String> getPlayerPerformance(@PathVariable int playerId) {
         String performance = _playerService.getPlayerPerformance(playerId);
         return ResponseEntity.ok(performance);
     }
 
     @GetMapping("/{playerId}")
+    @Operation(summary = "Returns a player by id")
     public ResponseEntity<Object> getPlayer(@PathVariable int playerId) {
         Player player = _playerService.getPlayer(playerId);
         if(player == null) {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MetricsController {
 
     @GetMapping("/advanced")
-    @Operation(summary = "Estadísticas calculadas a partir de los datos obtenidos. (Asumiendo métricas generales o que se pueden filtrar).")
+    @Operation(summary = "Statistics calculated from the data obtained (assuming general or filterable metrics).")
     public ResponseEntity<Object> getAdvancedMetrics(){
         return ResponseEntity.ok(null);
     }

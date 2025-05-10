@@ -1,6 +1,13 @@
 package unq.dapp.grupoj.soccergenius.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/teams")
+@Tag(name = "Team Management", description = "API for accessing team information, players, upcoming matches and comparisons")
 public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
@@ -23,8 +31,22 @@ public class TeamController {
     }
 
     @GetMapping("/{teamName}/{country}/players")
-    @Operation(summary = "retorna información de los jugadores de un equipo, incluyendo nombre, partidos jugados, goles, asistencias y rating.")
-    public ResponseEntity<List<String>> getTeamPlayers (@PathVariable String teamName, @PathVariable String country){
+    @Operation(
+        summary = "Get team players",
+        description = "Returns information on a team's players, including name, games played, goals, assists and rating."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Successfully retrieved team players",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))
+        ),
+        @ApiResponse(responseCode = "404", description = "Team not found"),
+        @ApiResponse(responseCode = "500", description = "Error during scraping process")
+    })
+    public ResponseEntity<List<String>> getTeamPlayers (
+            @Parameter(description = "Name of the team", example = "Barcelona") @PathVariable String teamName,
+            @Parameter(description = "Country of the team", example = "Spain") @PathVariable String country) {
         String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
         String requestedCountry = country.replaceAll("[\n\r]", "_");
 
@@ -43,20 +65,56 @@ public class TeamController {
     }
 
     @GetMapping("/{teamName}/upcomingMatches")
-    @Operation(summary = "retorna un listado de los proximos partidos para el equipo seleccionado")
-    public ResponseEntity<List<MatchDTO>> getUpcomingMatches(@PathVariable String teamName){
+    @Operation(
+        summary = "Get upcoming matches",
+        description = "Returns a list of upcoming games for the selected team"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Successfully retrieved upcoming matches",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = MatchDTO.class)))
+        ),
+        @ApiResponse(responseCode = "404", description = "Team not found"),
+        @ApiResponse(responseCode = "500", description = "Server error")
+    })
+    public ResponseEntity<List<MatchDTO>> getUpcomingMatches(
+            @Parameter(description = "Name of the team", example = "RealMadrid") @PathVariable String teamName) {
         List<MatchDTO> upcomingMatches = this.teamService.getUpcomingMatches(teamName);
         return ResponseEntity.status(HttpStatus.OK).body(upcomingMatches);
     }
 
     @GetMapping("/comparison")
-    @Operation(summary = "Permite obtener métricas comparativas entre dos equipos")
-    public ResponseEntity<Object> getTeamComparison(@RequestParam String team1Id, @RequestParam String team2Id){
+    @Operation(
+        summary = "Compare teams",
+        description = "Allows to obtain comparative metrics between two teams"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Teams compared successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid team IDs"),
+        @ApiResponse(responseCode = "404", description = "One or both teams not found")
+    })
+    public ResponseEntity<Object> getTeamComparison(
+            @Parameter(description = "ID of the first team to compare", example = "1") @RequestParam String team1Id,
+            @Parameter(description = "ID of the second team to compare", example = "2") @RequestParam String team2Id) {
         return ResponseEntity.ok(null);
     }
 
     @GetMapping("/{teamId}")
-    public ResponseEntity<TeamDto> getTeam(@PathVariable String teamId) {
+    @Operation(
+        summary = "Get team by ID",
+        description = "Returns detailed information about a specific team"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Team found",
+            content = @Content(schema = @Schema(implementation = TeamDto.class))
+        ),
+        @ApiResponse(responseCode = "404", description = "Team not found")
+    })
+    public ResponseEntity<TeamDto> getTeam(
+            @Parameter(description = "ID of the team to retrieve", example = "BAR") @PathVariable String teamId) {
         logger.info("Request received to get all teams");
         TeamDto team = this.teamService.getTeamFromLaLiga(teamId);
         return ResponseEntity.status(HttpStatus.OK).body(team);
