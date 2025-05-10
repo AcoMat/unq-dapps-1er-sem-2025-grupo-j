@@ -29,12 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String path = request.getServletPath();
 
-        // Ignorar rutas públicas
-        if ("/auth/login".equals(path) || "/auth/register".equals(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String token = extractTokenFromRequest(request);
 
         String jsonType = "application/json;charset=UTF-8";
