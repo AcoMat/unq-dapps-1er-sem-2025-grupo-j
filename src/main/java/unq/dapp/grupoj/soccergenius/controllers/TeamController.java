@@ -42,7 +42,7 @@ public class TeamController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Successfully retrieved team players",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))
         ),
@@ -76,7 +76,7 @@ public class TeamController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Successfully retrieved upcoming matches",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = MatchDTO.class)))
         ),
@@ -112,7 +112,7 @@ public class TeamController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Team found",
             content = @Content(schema = @Schema(implementation = TeamDto.class))
         ),
@@ -121,7 +121,7 @@ public class TeamController {
     public ResponseEntity<TeamDto> getTeam(
             @Parameter(description = "ID of the team to retrieve", example = "BAR") @PathVariable String teamId) {
         logger.info("Request received to get all teams");
-        TeamDto team = this.teamService.getTeamFromLaLiga(teamId);
+        TeamDto team = this.teamService.getTeamFromLaLigaById(teamId);
         return ResponseEntity.status(HttpStatus.OK).body(team);
     }
 }

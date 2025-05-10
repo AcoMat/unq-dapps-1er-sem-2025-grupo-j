@@ -111,9 +111,6 @@ public class WebScrapingService {
         String height_text = driver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div")).getText();
         String playerHeight = height_text.replace("Altura:", "").strip();
 
-        WebElement team_element = driver.findElement(By.className("team-link"));
-        String playerActualTeam = team_element.getText();
-
         return new Player(
                 playerId,
                 playerName,
@@ -187,7 +184,7 @@ public class WebScrapingService {
     }
 
 
-    public Team scrapTeamData(String teamId) {
+    public Team scrapTeamDataById(int teamId) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
@@ -212,6 +209,30 @@ public class WebScrapingService {
         return new Team(teamId, teamName, countryName, leagueName);
     }
 
+    public int scrapActualTeamFromPlayer(int playerId) {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        String teamName;
+        String leagueName;
+        String countryName;
+
+        String URL = BASE_URL + "/players/" + playerId;
+        try {
+            driver.navigate().to(URL);
+
+            WebElement team_element = driver.findElement(By.className("team-link"));
+            String href = team_element.getAttribute("href");
+
+            String teamId = href.replaceAll(".*/teams/(\\d+)/.*", "$1");
+            return Integer.parseInt(teamId);
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping team data: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
     private WebDriver createWebDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new"); // Modo headless moderno
@@ -222,5 +243,6 @@ public class WebScrapingService {
         options.addArguments("user-agent=" + USER_AGENT); // Usar constante
         return new ChromeDriver(options);
     }
+
 
 }
