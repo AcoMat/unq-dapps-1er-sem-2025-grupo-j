@@ -36,7 +36,8 @@ public class TeamServiceImpl implements TeamService {
              TeamRepository teamRepository,
              Mapper mapper,
              RestTemplate restTemplate,
-             PlayerService playerService) {
+             PlayerService playerService
+        ) {
         this.webScrapingService = webScrapingService;
         this.restTemplate = restTemplate;
         this.teamRepository = teamRepository;
@@ -76,13 +77,13 @@ public class TeamServiceImpl implements TeamService {
 
         List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
 
-        String idTeam = competitionTeams.stream()
+        int idTeam = competitionTeams.stream()
                 .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
                 .findFirst()
                 .map(Team::getId)
                 .orElseThrow(()->new RuntimeException("Equipo no encontrado: " + teamName));
 
-        String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id",idTeam);
+        String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id",String.valueOf(idTeam));
 
         ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam,HttpMethod.GET,entity,FootballApiResponseDTO.class);
 
@@ -113,7 +114,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamDto getTeamFromLaLiga(String teamId) {
+    public TeamDto getTeamFromLaLigaById(int teamId) {
         logger.debug("Searching team in DB {} from La Liga", teamId);
         Team dbTeam = this.teamRepository.findById(teamId).orElse(null);
         if (dbTeam != null) {
@@ -121,7 +122,7 @@ public class TeamServiceImpl implements TeamService {
             return this.mapper.toDTO(dbTeam);
         } else {
             logger.debug("Team not found in DB {} from La Liga", teamId);
-            Team scrappedTeam = this.webScrapingService.scrapTeamData(teamId);
+            Team scrappedTeam = this.webScrapingService.scrapTeamDataById(teamId);
             teamRepository.save(scrappedTeam);
             logger.debug("Scraped team data for team {} from La Liga", teamId);
             return this.mapper.toDTO(scrappedTeam);
