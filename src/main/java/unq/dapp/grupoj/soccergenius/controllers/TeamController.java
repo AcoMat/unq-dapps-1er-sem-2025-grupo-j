@@ -42,7 +42,7 @@ public class TeamController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200",
+            responseCode = "200", 
             description = "Successfully retrieved team players",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)))
         ),
@@ -76,7 +76,7 @@ public class TeamController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200",
+            responseCode = "200", 
             description = "Successfully retrieved upcoming matches",
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = MatchDTO.class)))
         ),
