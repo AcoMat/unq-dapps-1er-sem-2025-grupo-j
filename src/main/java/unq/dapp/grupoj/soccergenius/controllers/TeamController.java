@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/teams")
+@SecurityRequirement(name = "bearerAuth")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token")
+})
 @Tag(name = "Team Management", description = "API for accessing team information, players, upcoming matches and comparisons")
 public class TeamController {
     private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
