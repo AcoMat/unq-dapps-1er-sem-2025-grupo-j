@@ -21,7 +21,7 @@ import java.util.List;
 
 @Service
 public class WebScrapingService {
-    private static final String BASE_URL        = "https://es.whoscored.com";
+    private static final String BASE_URL = "https://es.whoscored.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
     public List<String> getPlayersIdsFromTeam(String teamName, String country) {
