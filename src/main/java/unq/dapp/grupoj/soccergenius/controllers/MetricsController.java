@@ -1,6 +1,7 @@
 package unq.dapp.grupoj.soccergenius.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/metrics")
+@SecurityRequirement(name = "bearerAuth")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token")
+})
 @Tag(name = "Metrics", description = "Endpoints for accessing various metrics and statistics")
 public class MetricsController {
 
