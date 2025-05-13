@@ -119,7 +119,7 @@ public class TeamController {
         @ApiResponse(responseCode = "404", description = "Team not found")
     })
     public ResponseEntity<TeamDto> getTeam(
-            @Parameter(description = "ID of the team to retrieve", example = "BAR") @PathVariable String teamId) {
+            @Parameter(description = "ID of the team to retrieve", example = "BAR") @PathVariable Integer teamId) {
         logger.info("Request received to get all teams");
         TeamDto team = this.teamService.getTeamFromLaLigaById(teamId);
         return ResponseEntity.status(HttpStatus.OK).body(team);
