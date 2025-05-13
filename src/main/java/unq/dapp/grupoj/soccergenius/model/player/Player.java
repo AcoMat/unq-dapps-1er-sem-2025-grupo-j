@@ -57,7 +57,7 @@ public class Player {
         this.lastUpdate = ZonedDateTime.now();
     }
 
-    public void setActualTeam(Team actualTeam) {
+    public void updateActualTeam(Team actualTeam) {
         this.actualTeam = actualTeam;
         this.lastUpdate = ZonedDateTime.now();
     }

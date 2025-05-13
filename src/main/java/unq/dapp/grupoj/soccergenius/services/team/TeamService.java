@@ -8,6 +8,6 @@ import java.util.List;
 public interface TeamService {
 
     List<String> getTeamPlayers(String teamName, String country);
-    TeamDto getTeamFromLaLiga(String teamId);
+    TeamDto getTeamFromLaLigaById(int teamId);
     List<MatchDTO> getUpcomingMatches(String teamName);
 }
