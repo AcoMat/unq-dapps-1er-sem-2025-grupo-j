@@ -16,11 +16,12 @@ public class MatchesService {
     public String getMatchPredictionBetween(String team1Id, String team2Id) {
         /*
         Datos para predecir un partido
-       - Ultimos 5 partidos
-       - Ultimos 5 encuentros
-       - Comparacion de rating
-        - Local o visitante
-         */
+        - Ultimos 5 partidos de local de cada equipo (filter getLastXMatchesFromTeam)
+        - Ultimos 5 partidos de visitante de cada equipo (filter getLastXMatchesFromTeam)
+        - Ultimos 10 partidos entre los dos equipos
+        - Posicion en la tabla de la liga
+        - Numero de rating del equipo
+        */
         throw new NotImplementedException();
     }
 }

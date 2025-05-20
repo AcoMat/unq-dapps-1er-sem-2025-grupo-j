@@ -14,7 +14,7 @@ import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
-import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
 
 import java.util.List;
 import java.util.stream.Collectors;

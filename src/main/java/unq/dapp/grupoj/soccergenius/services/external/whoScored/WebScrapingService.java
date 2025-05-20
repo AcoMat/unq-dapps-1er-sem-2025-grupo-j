@@ -1,6 +1,7 @@
-package unq.dapp.grupoj.soccergenius.services.scrapping;
+package unq.dapp.grupoj.soccergenius.services.external.whoScored;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.apache.commons.lang3.NotImplementedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -232,6 +233,32 @@ public class WebScrapingService {
             driver.quit();
         }
     }
+
+    public List<String> getLastEncountersBetween(int firstTeam, int SecTeam){
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        String URL = BASE_URL + "/players/" + firstTeam + "/" + SecTeam;
+        try{
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            driver.quit();
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public int getCurrentPositionOnLeague(int teamId){
+        throw new NotImplementedException();
+    }
+
+    public int getCurrentRankingOfTeam(int teamId) {
+        throw new NotImplementedException();
+    }
+
+
 
     private WebDriver createWebDriver() {
         ChromeOptions options = new ChromeOptions();
