@@ -1,7 +1,6 @@
 package unq.dapp.grupoj.soccergenius.services.external.whoScored;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.apache.commons.lang3.NotImplementedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -11,6 +10,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
+import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
@@ -28,8 +29,6 @@ public class WebScrapingService {
     public List<String> getPlayersIdsFromTeam(String teamName, String country) {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
-
-        List<Player> scrapedData = new ArrayList<>();
 
         try {
             String urlTMP = BASE_URL + "/search/?t=" + teamName;
@@ -214,10 +213,6 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String teamName;
-        String leagueName;
-        String countryName;
-
         String URL = BASE_URL + "/players/" + playerId;
         try {
             driver.navigate().to(URL);
@@ -234,29 +229,255 @@ public class WebScrapingService {
         }
     }
 
-    public List<String> getLastEncountersBetween(int firstTeam, int SecTeam){
+    public String findMatchLink(String teamName1, String teamName2){
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String URL = BASE_URL + "/players/" + firstTeam + "/" + SecTeam;
-        try{
+        String URL = BASE_URL + "/regions/206/tournaments/4/espa%C3%B1a-laliga";
+        String matchUrl = null;
+        try {
+            driver.navigate().to(URL);
 
+            // Find all match fixtures
+            List<WebElement> matches = driver.findElements(By.className("Match-module_match__XlKTY"));
+
+            for (WebElement matchElement : matches) {
+                // Find team names within this match fixture
+                List<WebElement> teamNameElements = matchElement.findElements(By.className("Match-module_teamNameText__Dqv-G"));
+
+                if (teamNameElements.size() == 2) { // Ensure there are exactly two team name elements
+                    String actualTeam1 = teamNameElements.get(0).getText().trim();
+                    String actualTeam2 = teamNameElements.get(1).getText().trim();
+
+                    // Check if both provided team names are present in this match
+                    // (Order might not matter, so check both combinations)
+                    boolean team1Found = actualTeam1.equalsIgnoreCase(teamName1) || actualTeam2.equalsIgnoreCase(teamName1);
+                    boolean team2Found = actualTeam1.equalsIgnoreCase(teamName2) || actualTeam2.equalsIgnoreCase(teamName2);
+
+                    if (team1Found && team2Found) {
+                        // If both teams are found, get the link of that match
+                        WebElement scoreLinkElement = matchElement.findElement(By.className("Match-module_score__5Ghhj"));
+                        matchUrl = scoreLinkElement.getAttribute("href");
+                        break;
+                    }
+                }
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // It's good practice to log the exception or handle it more specifically
+            // e.printStackTrace();
+            throw new ScrappingException("Error scraping match links: " + e.getMessage());
         } finally {
             driver.quit();
         }
+        return matchUrl;
+    }
 
-        throw new NotImplementedException();
+    public List<Match> getPreviousMeetings(String teamName1, String teamName2) {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        List<Match> matches = new ArrayList<>();
+
+        String matchLink = findMatchLink(teamName1, teamName2);
+        if (matchLink == null) {
+            driver.quit();
+            return matches; // No link found, return empty list
+        }
+
+        try {
+            driver.navigate().to(matchLink);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("previous-meetings-grid")));
+
+            WebElement grid = driver.findElement(By.id("previous-meetings-grid"));
+            List<WebElement> rows = grid.findElements(By.className("divtable-row"));
+
+            for (WebElement row : rows) {
+                String matchId = row.getAttribute("data-id");
+
+                // Date
+                String date = "";
+                try {
+                    WebElement dateDiv = row.findElement(By.cssSelector(".date-long > div"));
+                    date = dateDiv.getText();
+                } catch (Exception e) {
+                    try {
+                        List<WebElement> dateParts = row.findElements(By.cssSelector(".date-stacked > div"));
+                        if (dateParts.size() == 2) {
+                            date = dateParts.get(0).getText() + " " + dateParts.get(1).getText(); // e.g., "11.23 2024"
+                        } else if (!dateParts.isEmpty()) {
+                            date = dateParts.get(0).getText();
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                // Home & Away teams
+                String homeTeam = "";
+                String awayTeam = "";
+                try {
+                    // Try horizontal display first
+                    homeTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.home .team-link")).getText();
+                    awayTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.away .team-link")).getText();
+                } catch (Exception e) {
+                    // Fallback to stacked display
+                    try {
+                        List<WebElement> teamsStacked = row.findElements(By.cssSelector(".stacked-teams-display .team-link"));
+                        if (teamsStacked.size() >= 2) {
+                            homeTeam = teamsStacked.get(0).getText();
+                            awayTeam = teamsStacked.get(1).getText();
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                // Scores
+                String homeScore = "";
+                String awayScore = "";
+                try {
+                    // Try horizontal result first
+                    WebElement resultEl = row.findElement(By.cssSelector(".result > a.horiz-match-link"));
+                    String[] scores = resultEl.getText().split(":");
+                    if (scores.length == 2) {
+                        homeScore = scores[0].trim();
+                        awayScore = scores[1].trim();
+                    }
+                } catch (Exception e) {
+                    // Fallback to stacked scores
+                    try {
+                        homeScore = row.findElement(By.cssSelector(".stacked-score-display .home-score")).getText();
+                        awayScore = row.findElement(By.cssSelector(".stacked-score-display .away-score")).getText();
+                    } catch (Exception ignored) {}
+                }
+
+                // Winner
+                String winner = "Draw"; // Default
+                try {
+                    winner = row.findElement(By.cssSelector(".horizontal-match-display.team.home.winner .team-link")).getText();
+                } catch (Exception eHomeWinner) {
+                    try {
+                        winner = row.findElement(By.cssSelector(".horizontal-match-display.team.away.winner .team-link")).getText();
+                    } catch (Exception eAwayWinner) {
+                        try {
+                            winner = row.findElement(By.cssSelector(".stacked-teams-display .team.winner .team-link")).getText();
+                        } catch (Exception eStackedWinner) {
+                            // If no explicit winner class, determine from scores if possible
+                            if (!homeScore.isEmpty() && !awayScore.isEmpty() && !homeTeam.isEmpty() && !awayTeam.isEmpty()) {
+                                try {
+                                    int hS = Integer.parseInt(homeScore);
+                                    int aS = Integer.parseInt(awayScore);
+                                    if (hS > aS) {
+                                        winner = homeTeam;
+                                    } else if (aS > hS) {
+                                        winner = awayTeam;
+                                    }
+                                    // If scores are equal, it remains "Draw"
+                                } catch (NumberFormatException nfe) {
+                                    // Scores not parsable, winner remains "Draw" or as previously found
+                                }
+                            }
+                        }
+                    }
+                }
+
+                matches.add(new Match(
+                        matchId,
+                        date,
+                        homeTeam,
+                        awayTeam,
+                        winner,
+                        homeScore,
+                        awayScore
+                ));
+            }
+            return matches;
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping previous meetings: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
     }
 
     public int getCurrentPositionOnLeague(int teamId){
-        throw new NotImplementedException();
+        String URL = BASE_URL + "/regions/206/tournaments/4/seasons/6960/españa-laliga";
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+
+        try {
+            driver.navigate().to(URL);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+            WebElement tableBody = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("standings-15375-content")));
+
+            List<WebElement> rows = tableBody.findElements(By.tagName("tr"));
+            for (WebElement row : rows) {
+                String currentRowTeamIdStr = row.getAttribute("data-team-id");
+
+                if (currentRowTeamIdStr != null && !currentRowTeamIdStr.isEmpty()) {
+                    try {
+                        int currentRowTeamId = Integer.parseInt(currentRowTeamIdStr);
+
+                        if (currentRowTeamId == teamId) {
+                            WebElement firstCell = row.findElement(By.xpath("./td[1]"));
+                            WebElement positionSpan = firstCell.findElement(By.tagName("span"));
+
+                            String positionText = positionSpan.getText().trim();
+                            if (!positionText.isEmpty()) {
+                                return Integer.parseInt(positionText);
+                            } else {
+                                throw new TeamNotFoundException("Team ID " + teamId + " has no position in league standings.");
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Could not parse team ID or position for a row: " + e.getMessage());
+                    } catch (org.openqa.selenium.NoSuchElementException e) {
+                        System.err.println("Could not find position element structure in a row for team ID " + currentRowTeamIdStr + ": " + e.getMessage());
+                    }
+                }
+            }
+            throw new TeamNotFoundException("Team ID " + teamId + " not found in league standings.");
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping current position on league: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
     }
 
-    public int getCurrentRankingOfTeam(int teamId) {
-        throw new NotImplementedException();
+    public double getCurrentRankingOfTeam(int teamId) {
+        String URL = BASE_URL + "/teams/" + teamId;
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = createWebDriver();
+
+        try{
+            driver.navigate().to(URL);
+
+            // Wait for the table to load
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            String ratingXPath = "//tbody[@id='top-team-stats-summary-content']/tr[last()]/td[@class='rating']/strong";
+
+            // Wait for the rating element to be visible
+            WebElement ratingStrongElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(ratingXPath)));
+
+            String ratingText = ratingStrongElement.getText();
+
+            // Handle cases where rating might not be a valid number (e.g., "-")
+            if (ratingText == null || ratingText.trim().equals("-") || ratingText.trim().isEmpty()) {
+                throw new ScrappingException("Rating not available or invalid for team ID: " + teamId);
+            }
+
+            return Double.parseDouble(ratingText);
+
+        } catch (NumberFormatException e) {
+            throw new ScrappingException("Error parsing team rating: " + e.getMessage());
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping current ranking of team: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
     }
+
 
 
 
