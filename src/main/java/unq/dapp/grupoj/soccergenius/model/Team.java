@@ -20,6 +20,8 @@ import java.util.List;
     private String name;
     private String country;
     private String league;
+    @Setter
+    private Double averageRating;
 
     @OneToMany(mappedBy = "actualTeam")
     @Setter
