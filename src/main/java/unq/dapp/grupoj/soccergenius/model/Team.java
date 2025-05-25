@@ -14,7 +14,9 @@ import java.util.List;
 @ToString
 @Entity
 @NoArgsConstructor
-@Getter public class Team {
+@Getter
+@Setter
+public class Team {
     @Id
     private int id;
     private String name;

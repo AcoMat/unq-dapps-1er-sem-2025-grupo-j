@@ -16,6 +16,11 @@ public class PlayerService {
         this._webScrapingService = new WebScrapingService();
     }
 
+    public PlayerService(PlayerRepository playerRepository,WebScrapingService webScrapingService) {
+        this._playerRepository = playerRepository;
+        this._webScrapingService = webScrapingService;
+    }
+
     public Player getPlayer(int playerId) {
         //TODO: check last update and refesh data
         Player player = _playerRepository.findById(playerId).orElse(null);
