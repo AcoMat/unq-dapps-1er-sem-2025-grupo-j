@@ -13,7 +13,6 @@ import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
-import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
 
 import java.util.List;
@@ -25,7 +24,6 @@ public class TeamServiceImpl implements TeamService {
     private static final Logger logger = LoggerFactory.getLogger(TeamServiceImpl.class);
 
     private final WebScrapingService webScrapingService;
-    private final PlayerService playerService;
 
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
@@ -35,14 +33,12 @@ public class TeamServiceImpl implements TeamService {
             (WebScrapingService webScrapingService,
              TeamRepository teamRepository,
              Mapper mapper,
-             RestTemplate restTemplate,
-             PlayerService playerService
+             RestTemplate restTemplate
         ) {
         this.webScrapingService = webScrapingService;
         this.restTemplate = restTemplate;
         this.teamRepository = teamRepository;
         this.mapper = mapper;
-        this.playerService = playerService;
     }
 
     @Override

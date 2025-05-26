@@ -11,11 +11,6 @@ public class PlayerService {
     private final PlayerRepository _playerRepository;
     private final WebScrapingService _webScrapingService;
 
-    public PlayerService(PlayerRepository playerRepository) {
-        this._playerRepository = playerRepository;
-        this._webScrapingService = new WebScrapingService();
-    }
-
     public PlayerService(PlayerRepository playerRepository,WebScrapingService webScrapingService) {
         this._playerRepository = playerRepository;
         this._webScrapingService = webScrapingService;

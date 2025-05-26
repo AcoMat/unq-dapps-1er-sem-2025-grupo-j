@@ -1,9 +1,12 @@
 package unq.dapp.grupoj.soccergenius.model.dtos.external.football_data;
 
+import lombok.Getter;
+
+@Getter
 public class FootballDataTeamDto {
-    public Integer id;
-    public String name;
-    public String shortName;
-    public String tla;
-    public String crest;
+    private Integer id;
+    private String name;
+    private String shortName;
+    private String tla;
+    private String crest;
 }

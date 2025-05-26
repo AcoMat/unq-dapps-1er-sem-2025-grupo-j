@@ -1,7 +1,10 @@
 package unq.dapp.grupoj.soccergenius.model.dtos.external.football_data;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class FootballDataMatchsDto {
-    public List<FootballDataMatchDto> matches;
+    private List<FootballDataMatchDto> matches;
 }

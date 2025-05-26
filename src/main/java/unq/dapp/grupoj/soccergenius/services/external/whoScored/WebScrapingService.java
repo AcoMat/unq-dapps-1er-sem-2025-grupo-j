@@ -31,8 +31,8 @@ public class WebScrapingService {
         WebDriver driver = createWebDriver();
 
         try {
-            String urlTMP = BASE_URL + "/search/?t=" + teamName;
-            driver.navigate().to(urlTMP);
+            String urlTmp = BASE_URL + "/search/?t=" + teamName;
+            driver.navigate().to(urlTmp);
 
             WebElement divResult = driver.findElement(By.className("search-result"));
             WebElement teamsTable = divResult.findElement(By.xpath("./table[1]"));
@@ -53,6 +53,9 @@ public class WebScrapingService {
                 }
             }
 
+            if( teamUrl == null || teamUrl.isEmpty()) {
+                throw new TeamNotFoundException("Team " + teamName + " not found in country " + country);
+            }
             driver.navigate().to(teamUrl);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("player-table-statistics-body")));
@@ -76,10 +79,10 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String URL = BASE_URL + "/players/" + playerId;
+        String url = BASE_URL + "/players/" + playerId;
         try{
 
-        driver.navigate().to(URL);
+        driver.navigate().to(url);
 
         List<WebElement> errorMessages = driver.findElements(
                 By.xpath("//*[contains(text(), 'The page you requested does not exist')]"));
@@ -108,8 +111,8 @@ public class WebScrapingService {
             playerPositions.add(position.getText().trim());
         }
 
-        String height_text = driver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div")).getText();
-        String playerHeight = height_text.replace("Altura:", "").strip();
+        String heightText = driver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div")).getText();
+        String playerHeight = heightText.replace("Altura:", "").strip();
 
         return new Player(
                 playerId,
@@ -127,13 +130,13 @@ public class WebScrapingService {
     }
 
     public CurrentParticipationsSummary getCurrentParticipationInfo(Player player) {
-        String URL = BASE_URL + "/players/" + player.getId();
+        String url = BASE_URL + "/players/" + player.getId();
 
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
         try {
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
 
             // Wait for the table to load
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
@@ -157,12 +160,12 @@ public class WebScrapingService {
     }
 
     public HistoricalParticipationsSummary getHistoryInfo(Player player) {
-        String URL = BASE_URL + "/players/" + player.getId() + "/history";
+        String url = BASE_URL + "/players/" + player.getId() + "/history";
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
         try{
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
 
@@ -192,8 +195,8 @@ public class WebScrapingService {
         String leagueName;
         String countryName;
 
-        String URL = BASE_URL + "/teams/" + teamId;
-        driver.navigate().to(URL);
+        String url = BASE_URL + "/teams/" + teamId;
+        driver.navigate().to(url);
 
         WebElement teamNameSpan = driver.findElement(By.className("team-header-name"));
         teamName = teamNameSpan.getText();
@@ -213,13 +216,14 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String URL = BASE_URL + "/players/" + playerId;
+        String url = BASE_URL + "/players/" + playerId;
         try {
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
 
-            WebElement team_element = driver.findElement(By.className("team-link"));
-            String href = team_element.getAttribute("href");
+            WebElement teamElement = driver.findElement(By.className("team-link"));
+            String href = teamElement.getAttribute("href");
 
+            assert href != null;
             String teamId = href.replaceAll(".*/teams/(\\d+)/.*", "$1");
             return Integer.parseInt(teamId);
         } catch (Exception e) {
@@ -233,10 +237,10 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-        String URL = BASE_URL + "/regions/206/tournaments/4/espa%C3%B1a-laliga";
+        String url = BASE_URL + "/regions/206/tournaments/4/espa%C3%B1a-laliga";
         String matchUrl = null;
         try {
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
 
             // Find all match fixtures
             List<WebElement> matches = driver.findElements(By.className("Match-module_match__XlKTY"));
@@ -277,108 +281,27 @@ public class WebScrapingService {
         WebDriver driver = createWebDriver();
 
         List<Match> matches = new ArrayList<>();
-
         String matchLink = findMatchLink(teamName1, teamName2);
         if (matchLink == null) {
             driver.quit();
-            return matches; // No link found, return empty list
+            return matches;
         }
-
         try {
             driver.navigate().to(matchLink);
-
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("previous-meetings-grid")));
-
             WebElement grid = driver.findElement(By.id("previous-meetings-grid"));
             List<WebElement> rows = grid.findElements(By.className("divtable-row"));
-
             for (WebElement row : rows) {
                 String matchId = row.getAttribute("data-id");
-
-                // Date
-                String date = "";
-                try {
-                    WebElement dateDiv = row.findElement(By.cssSelector(".date-long > div"));
-                    date = dateDiv.getText();
-                } catch (Exception e) {
-                    try {
-                        List<WebElement> dateParts = row.findElements(By.cssSelector(".date-stacked > div"));
-                        if (dateParts.size() == 2) {
-                            date = dateParts.get(0).getText() + " " + dateParts.get(1).getText(); // e.g., "11.23 2024"
-                        } else if (!dateParts.isEmpty()) {
-                            date = dateParts.get(0).getText();
-                        }
-                    } catch (Exception ignored) {}
-                }
-
-                // Home & Away teams
-                String homeTeam = "";
-                String awayTeam = "";
-                try {
-                    // Try horizontal display first
-                    homeTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.home .team-link")).getText();
-                    awayTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.away .team-link")).getText();
-                } catch (Exception e) {
-                    // Fallback to stacked display
-                    try {
-                        List<WebElement> teamsStacked = row.findElements(By.cssSelector(".stacked-teams-display .team-link"));
-                        if (teamsStacked.size() >= 2) {
-                            homeTeam = teamsStacked.get(0).getText();
-                            awayTeam = teamsStacked.get(1).getText();
-                        }
-                    } catch (Exception ignored) {}
-                }
-
-                // Scores
-                String homeScore = "";
-                String awayScore = "";
-                try {
-                    // Try horizontal result first
-                    WebElement resultEl = row.findElement(By.cssSelector(".result > a.horiz-match-link"));
-                    String[] scores = resultEl.getText().split(":");
-                    if (scores.length == 2) {
-                        homeScore = scores[0].trim();
-                        awayScore = scores[1].trim();
-                    }
-                } catch (Exception e) {
-                    // Fallback to stacked scores
-                    try {
-                        homeScore = row.findElement(By.cssSelector(".stacked-score-display .home-score")).getText();
-                        awayScore = row.findElement(By.cssSelector(".stacked-score-display .away-score")).getText();
-                    } catch (Exception ignored) {}
-                }
-
-                // Winner
-                String winner = "Draw"; // Default
-                try {
-                    winner = row.findElement(By.cssSelector(".horizontal-match-display.team.home.winner .team-link")).getText();
-                } catch (Exception eHomeWinner) {
-                    try {
-                        winner = row.findElement(By.cssSelector(".horizontal-match-display.team.away.winner .team-link")).getText();
-                    } catch (Exception eAwayWinner) {
-                        try {
-                            winner = row.findElement(By.cssSelector(".stacked-teams-display .team.winner .team-link")).getText();
-                        } catch (Exception eStackedWinner) {
-                            // If no explicit winner class, determine from scores if possible
-                            if (!homeScore.isEmpty() && !awayScore.isEmpty() && !homeTeam.isEmpty() && !awayTeam.isEmpty()) {
-                                try {
-                                    int hS = Integer.parseInt(homeScore);
-                                    int aS = Integer.parseInt(awayScore);
-                                    if (hS > aS) {
-                                        winner = homeTeam;
-                                    } else if (aS > hS) {
-                                        winner = awayTeam;
-                                    }
-                                    // If scores are equal, it remains "Draw"
-                                } catch (NumberFormatException nfe) {
-                                    // Scores not parsable, winner remains "Draw" or as previously found
-                                }
-                            }
-                        }
-                    }
-                }
-
+                String date = extractDate(row);
+                String[] teams = extractTeams(row);
+                String homeTeam = teams[0];
+                String awayTeam = teams[1];
+                String[] scores = extractScores(row);
+                String homeScore = scores[0];
+                String awayScore = scores[1];
+                String winner = extractWinner(row, homeTeam, awayTeam, homeScore, awayScore);
                 matches.add(new Match(
                         matchId,
                         date,
@@ -397,14 +320,97 @@ public class WebScrapingService {
         }
     }
 
+    private String extractDate(WebElement row) {
+        try {
+            WebElement dateDiv = row.findElement(By.cssSelector(".date-long > div"));
+            return dateDiv.getText();
+        } catch (Exception e) {
+            try {
+                List<WebElement> dateParts = row.findElements(By.cssSelector(".date-stacked > div"));
+                if (dateParts.size() == 2) {
+                    return dateParts.get(0).getText() + " " + dateParts.get(1).getText();
+                } else if (!dateParts.isEmpty()) {
+                    return dateParts.getFirst().getText();
+                }
+            } catch (Exception ignored) {}
+        }
+        return "";
+    }
+
+    private String[] extractTeams(WebElement row) {
+        String homeTeam = "";
+        String awayTeam = "";
+        try {
+            homeTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.home .team-link")).getText();
+            awayTeam = row.findElement(By.cssSelector(".horizontal-match-display.team.away .team-link")).getText();
+        } catch (Exception e) {
+            try {
+                List<WebElement> teamsStacked = row.findElements(By.cssSelector(".stacked-teams-display .team-link"));
+                if (teamsStacked.size() >= 2) {
+                    homeTeam = teamsStacked.get(0).getText();
+                    awayTeam = teamsStacked.get(1).getText();
+                }
+            } catch (Exception ignored) {}
+        }
+        return new String[]{homeTeam, awayTeam};
+    }
+
+    private String[] extractScores(WebElement row) {
+        String homeScore = "";
+        String awayScore = "";
+        try {
+            WebElement resultEl = row.findElement(By.cssSelector(".result > a.horiz-match-link"));
+            String[] scores = resultEl.getText().split(":");
+            if (scores.length == 2) {
+                homeScore = scores[0].trim();
+                awayScore = scores[1].trim();
+            }
+        } catch (Exception e) {
+            try {
+                homeScore = row.findElement(By.cssSelector(".stacked-score-display .home-score")).getText();
+                awayScore = row.findElement(By.cssSelector(".stacked-score-display .away-score")).getText();
+            } catch (Exception ignored) {}
+        }
+        return new String[]{homeScore, awayScore};
+    }
+
+    private String extractWinner(WebElement row, String homeTeam, String awayTeam, String homeScore, String awayScore) {
+        try {
+            return row.findElement(By.cssSelector(".horizontal-match-display.team.home.winner .team-link")).getText();
+        } catch (Exception eHomeWinner) {
+            try {
+                return row.findElement(By.cssSelector(".horizontal-match-display.team.away.winner .team-link")).getText();
+            } catch (Exception eAwayWinner) {
+                try {
+                    return row.findElement(By.cssSelector(".stacked-teams-display .team.winner .team-link")).getText();
+                } catch (Exception eStackedWinner) {
+                    if (!homeScore.isEmpty() && !awayScore.isEmpty() && !homeTeam.isEmpty() && !awayTeam.isEmpty()) {
+                        try {
+                            int hS = Integer.parseInt(homeScore);
+                            int aS = Integer.parseInt(awayScore);
+                            if (hS > aS) {
+                                return homeTeam;
+                            } else if (aS > hS) {
+                                return awayTeam;
+                            }
+                        } catch (NumberFormatException nfe) {
+                            // Ignorar, devolver Draw
+                        }
+                    }
+                }
+            }
+        }
+        return "Draw";
+    }
+
     public int getCurrentPositionOnLeague(int teamId){
-        String URL = BASE_URL + "/regions/206/tournaments/4/seasons/6960/españa-laliga";
+        String url = BASE_URL + "/regions/206/tournaments/4/seasons/6960/españa-laliga";
 
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
         try {
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
             WebElement tableBody = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("standings-15375-content")));
@@ -444,13 +450,13 @@ public class WebScrapingService {
     }
 
     public double getCurrentRankingOfTeam(int teamId) {
-        String URL = BASE_URL + "/teams/" + teamId;
+        String url = BASE_URL + "/teams/" + teamId;
 
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
         try{
-            driver.navigate().to(URL);
+            driver.navigate().to(url);
 
             // Wait for the table to load
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
@@ -462,7 +468,7 @@ public class WebScrapingService {
             String ratingText = ratingStrongElement.getText();
 
             // Handle cases where rating might not be a valid number (e.g., "-")
-            if (ratingText == null || ratingText.trim().equals("-") || ratingText.trim().isEmpty()) {
+            if (ratingText.trim().equals("-") || ratingText.trim().isEmpty()) {
                 throw new ScrappingException("Rating not available or invalid for team ID: " + teamId);
             }
 
@@ -493,3 +499,5 @@ public class WebScrapingService {
 
 
 }
+
+
