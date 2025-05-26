@@ -3,7 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.player;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.repository.PlayerRepository;
-import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
 
 @Service
 public class PlayerService {

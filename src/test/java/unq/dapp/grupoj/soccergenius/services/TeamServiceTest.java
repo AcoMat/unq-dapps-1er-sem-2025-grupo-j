@@ -16,7 +16,7 @@ import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
-import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamServiceImpl;
 

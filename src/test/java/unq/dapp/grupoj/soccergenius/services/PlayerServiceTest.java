@@ -10,7 +10,7 @@ import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
 import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
 import unq.dapp.grupoj.soccergenius.repository.PlayerRepository;
-import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 
 import java.util.List;

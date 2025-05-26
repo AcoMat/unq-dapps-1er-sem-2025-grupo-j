@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.services.external.whoScored;
+package unq.dapp.grupoj.soccergenius.services.external.whoscored;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
@@ -224,7 +224,7 @@ public class WebScrapingService {
             String href = teamElement.getAttribute("href");
 
             assert href != null;
-            String teamId = href.replaceAll(".*/teams/(\\d+)/.*", "$1");
+            String teamId = href.replaceFirst("/teams/(\\d+)(?:/.*)?", "$1");
             return Integer.parseInt(teamId);
         } catch (Exception e) {
             throw new ScrappingException("Error scraping team data: " + e.getMessage());
@@ -267,8 +267,6 @@ public class WebScrapingService {
                 }
             }
         } catch (Exception e) {
-            // It's good practice to log the exception or handle it more specifically
-            // e.printStackTrace();
             throw new ScrappingException("Error scraping match links: " + e.getMessage());
         } finally {
             driver.quit();
@@ -332,7 +330,9 @@ public class WebScrapingService {
                 } else if (!dateParts.isEmpty()) {
                     return dateParts.getFirst().getText();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // Ignorar, devolver cadena vacía
+            }
         }
         return "";
     }
@@ -350,7 +350,9 @@ public class WebScrapingService {
                     homeTeam = teamsStacked.get(0).getText();
                     awayTeam = teamsStacked.get(1).getText();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // Ignorar, devolver cadenas vacías
+            }
         }
         return new String[]{homeTeam, awayTeam};
     }
@@ -369,7 +371,9 @@ public class WebScrapingService {
             try {
                 homeScore = row.findElement(By.cssSelector(".stacked-score-display .home-score")).getText();
                 awayScore = row.findElement(By.cssSelector(".stacked-score-display .away-score")).getText();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // Ignorar, devolver cadenas vacías
+            }
         }
         return new String[]{homeScore, awayScore};
     }
@@ -434,10 +438,8 @@ public class WebScrapingService {
                                 throw new TeamNotFoundException("Team ID " + teamId + " has no position in league standings.");
                             }
                         }
-                    } catch (NumberFormatException e) {
-                        System.err.println("Could not parse team ID or position for a row: " + e.getMessage());
-                    } catch (org.openqa.selenium.NoSuchElementException e) {
-                        System.err.println("Could not find position element structure in a row for team ID " + currentRowTeamIdStr + ": " + e.getMessage());
+                    } catch (Exception e) {
+                        throw new ScrappingException("Error parsing team ID from row: " + e.getMessage());
                     }
                 }
             }

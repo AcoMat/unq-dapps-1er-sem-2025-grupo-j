@@ -1,11 +1,13 @@
 package unq.dapp.grupoj.soccergenius.services.matches;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchDto;
 import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
-import unq.dapp.grupoj.soccergenius.services.external.whoScored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Service
 public class MatchService {
+    private static final Logger logger = LoggerFactory.getLogger(MatchService.class);
+    
     private final TeamService teamService;
     private final FootballDataApiService footballDataApiService;
     private final WebScrapingService webScrapingService;
@@ -83,6 +87,7 @@ public class MatchService {
     }
 
     public String getMatchPredictionBetween(int team1Id, int team2Id) {
+        logger.info("Solicitando predicción para partido entre equipos con ID {} y {}", team1Id, team2Id);
         /*
         Datos para predecir un partido
         - Ultimos 5 partidos de local de cada equipo
@@ -98,15 +103,9 @@ public class MatchService {
         // Obtener los IDs correctos para Football Data API
         Integer footballDataTeam1Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team1Id);
         Integer footballDataTeam2Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team2Id);
-        
-        System.out.println("ID original team1: " + team1Id + ", Football Data ID: " + footballDataTeam1Id);
-        System.out.println("ID original team2: " + team2Id + ", Football Data ID: " + footballDataTeam2Id);
-        
+
         List<FootballDataMatchDto> lastMatchesTeam1 = footballDataApiService.getLastXMatchesFromTeam(team1Id, 25).getMatches();
         List<FootballDataMatchDto> lastMatchesTeam2 = footballDataApiService.getLastXMatchesFromTeam(team2Id, 25).getMatches();
-
-        System.out.println("Partidos recuperados para equipo 1: " + (lastMatchesTeam1 != null ? lastMatchesTeam1.size() : "null"));
-        System.out.println("Partidos recuperados para equipo 2: " + (lastMatchesTeam2 != null ? lastMatchesTeam2.size() : "null"));
 
         assert lastMatchesTeam1 != null;
         List<FootballDataMatchDto> lastHomeMatchesTeam1 = lastMatchesTeam1.stream()
@@ -130,11 +129,6 @@ public class MatchService {
                 .limit(5)
                 .toList();
 
-        System.out.println("Últimos partidos como local del equipo 1: " + lastHomeMatchesTeam1.size());
-        System.out.println("Últimos partidos como visitante del equipo 1: " + lastAwayMatchesTeam1.size());
-        System.out.println("Últimos partidos como local del equipo 2: " + lastHomeMatchesTeam2.size());
-        System.out.println("Últimos partidos como visitante del equipo 2: " + lastAwayMatchesTeam2.size());
-
         double rankTeam1 = webScrapingService.getCurrentRankingOfTeam(team1Id);
         double rankTeam2 = webScrapingService.getCurrentRankingOfTeam(team2Id);
 
@@ -143,34 +137,42 @@ public class MatchService {
 
         List<Match> lastMatchesBetweenTeams = webScrapingService.getPreviousMeetings(team1.getName(), team2.getName());
         
+        logger.debug("Convirtiendo datos de partidos a formato string para procesamiento");
         String homeMatchesTeam1String = convertMatchesToString(lastHomeMatchesTeam1);
         String awayMatchesTeam1String = convertMatchesToString(lastAwayMatchesTeam1);
         String homeMatchesTeam2String = convertMatchesToString(lastHomeMatchesTeam2);
         String awayMatchesTeam2String = convertMatchesToString(lastAwayMatchesTeam2);
         String previousMeetingsString = formatPreviousMeetings(lastMatchesBetweenTeams);
         
-        System.out.println("String partidos locales equipo 1: " + homeMatchesTeam1String);
-        
+        logger.info("Preparando solicitud a Gemini AI para predicción de partido entre {} y {}", team1.getName(), team2.getName());
         Client client = new Client();
 
-        GenerateContentResponse response =
-                client.models.generateContent(
-                        "gemini-2.0-flash",
-                        "Basándote en los siguientes datos, calcula SOLAMENTE las probabilidades para el partido " + 
-                        team1.getName() + " vs " + team2.getName() + ".\n\n" +
-                        "Datos:\n" +
-                        "- Últimos partidos como local de " + team1.getName() + ": " + homeMatchesTeam1String + "\n" +
-                        "- Últimos partidos como visitante de " + team1.getName() + ": " + awayMatchesTeam1String + "\n" +
-                        "- Últimos partidos como local de " + team2.getName() + ": " + homeMatchesTeam2String + "\n" +
-                        "- Últimos partidos como visitante de " + team2.getName() + ": " + awayMatchesTeam2String + "\n" +
-                        "- " + team1.getName() + ": Posición " + team1Position + " en la liga, rating " + rankTeam1 + "\n" +
-                        "- " + team2.getName() + ": Posición " + team2Position + " en la liga, rating " + rankTeam2 + "\n" +
-                        "- Historial de enfrentamientos: " + previousMeetingsString + "\n\n" +
-                        "RESPONDE USANDO EXACTAMENTE ESTE FORMATO (solo números):\n" +
-                        "victoria_local%:empate%:victoria_visitante%\n\n" +
-                        "Ejemplo: 45:25:30",
-                        null);
+        try {
+            logger.info("Enviando solicitud a Gemini AI");
+            GenerateContentResponse response =
+                    client.models.generateContent(
+                            "gemini-2.0-flash",
+                            "Basándote en los siguientes datos, calcula SOLAMENTE las probabilidades para el partido " +
+                            team1.getName() + " vs " + team2.getName() + ".\n\n" +
+                            "Datos:\n" +
+                            "- Últimos partidos como local de " + team1.getName() + ": " + homeMatchesTeam1String + "\n" +
+                            "- Últimos partidos como visitante de " + team1.getName() + ": " + awayMatchesTeam1String + "\n" +
+                            "- Últimos partidos como local de " + team2.getName() + ": " + homeMatchesTeam2String + "\n" +
+                            "- Últimos partidos como visitante de " + team2.getName() + ": " + awayMatchesTeam2String + "\n" +
+                            "- " + team1.getName() + ": Posición " + team1Position + " en la liga, rating " + rankTeam1 + "\n" +
+                            "- " + team2.getName() + ": Posición " + team2Position + " en la liga, rating " + rankTeam2 + "\n" +
+                            "- Historial de enfrentamientos: " + previousMeetingsString + "\n\n" +
+                            "RESPONDE USANDO EXACTAMENTE ESTE FORMATO (solo números):\n" +
+                            "victoria_local%:empate%:victoria_visitante%\n\n" +
+                            "Ejemplo: 45:25:30",
+                            null);
 
-        return response.text();
+            String result = response.text();
+            logger.info("Predicción recibida de Gemini AI para partido {}-{}: {}", team1.getName(), team2.getName(), result);
+            return result;
+        } catch (Exception e) {
+            logger.error("Error al obtener predicción de Gemini AI: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }
