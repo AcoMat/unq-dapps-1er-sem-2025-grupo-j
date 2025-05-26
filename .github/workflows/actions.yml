@@ -63,22 +63,8 @@ jobs:
       # - Subir artefactos de test (Jacoco, Surefire reports via Gradle plugins)
       # - Construir una imagen Docker
       # - Desplegar la aplicación
-      # Paso 5: Analizar el código con SonarCloud
-      # Este paso envía los resultados de la compilación y las pruebas (incluyendo cobertura de JaCoCo) a SonarCloud.
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2.1.1 # Se recomienda usar una versión específica
+      # Paso 5: Analizar el código con SonarCloud usando el plugin de Gradle
+      - name: SonarCloud Analysis with Gradle
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Necesario para la decoración de Pull Requests y análisis de ramas/PRs
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Token de SonarCloud almacenado como secreto en GitHub
-        with:
-          # Argumentos pasados al SonarScanner.
-          # Reemplaza con los valores de tu proyecto en SonarCloud.
-          args: >
-            -Dsonar.projectKey=AcoMat_unq-dapps-1er-sem-2025-grupo-j
-            -Dsonar.organization=acomat
-            # El SonarScanner para Gradle (invocado por esta action) debería detectar
-            # automáticamente los informes de JaCoCo XML si tu build.gradle tiene el plugin jacoco
-            # y genera dichos informes (ej. mediante la tarea jacocoTestReport).
-            # La ruta por defecto es build/reports/jacoco/test/jacocoTestReport.xml.
-            # Si no los detecta, puedes especificar la ruta explícitamente:
-            # -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonarqube
