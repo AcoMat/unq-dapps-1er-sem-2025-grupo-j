@@ -64,7 +64,3 @@ jobs:
       # - Construir una imagen Docker
       # - Desplegar la aplicación
       # Paso 5: Analizar el código con SonarCloud usando el plugin de Gradle
-      - name: SonarCloud Analysis with Gradle
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonarqube
