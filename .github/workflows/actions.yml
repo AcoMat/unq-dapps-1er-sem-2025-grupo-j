@@ -74,8 +74,8 @@ jobs:
           # Argumentos pasados al SonarScanner.
           # Reemplaza con los valores de tu proyecto en SonarCloud.
           args: >
-            -Dsonar.projectKey=TU_PROJECT_KEY_EN_SONARCLOUD
-            -Dsonar.organization=TU_ORGANIZACION_EN_SONARCLOUD
+            -Dsonar.projectKey=AcoMat_unq-dapps-1er-sem-2025-grupo-j
+            -Dsonar.organization=acomat
             # El SonarScanner para Gradle (invocado por esta action) debería detectar
             # automáticamente los informes de JaCoCo XML si tu build.gradle tiene el plugin jacoco
             # y genera dichos informes (ej. mediante la tarea jacocoTestReport).
