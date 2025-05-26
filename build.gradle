@@ -59,6 +59,9 @@ dependencies {
 	implementation 'com.auth0:java-jwt:4.5.0'
 	implementation("org.springframework.boot:spring-boot-starter-validation:3.4.4")
 
+	// Gen IA
+	implementation 'com.google.genai:google-genai:1.0.0'
+
 	compileOnly "org.projectlombok:lombok:1.18.34"
 	annotationProcessor 'org.projectlombok:lombok:1.18.34'
 	testCompileOnly 'org.projectlombok:lombok:1.18.34'

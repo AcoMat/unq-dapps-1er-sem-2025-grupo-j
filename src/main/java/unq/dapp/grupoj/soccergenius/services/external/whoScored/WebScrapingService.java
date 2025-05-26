@@ -403,7 +403,6 @@ public class WebScrapingService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = createWebDriver();
 
-
         try {
             driver.navigate().to(URL);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
