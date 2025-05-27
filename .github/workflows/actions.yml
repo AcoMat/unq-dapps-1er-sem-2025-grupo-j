@@ -71,4 +71,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Token para autenticarse con SonarCloud (el plugin de Gradle lo usa)
         # Ejecuta la tarea 'sonarqube' de Gradle.
         # El plugin org.sonarqube en tu build.gradle leerá las variables de entorno GITHUB_TOKEN y SONAR_TOKEN.
-        run: ./gradlew sonarqube
+        run: ./gradlew sonar
