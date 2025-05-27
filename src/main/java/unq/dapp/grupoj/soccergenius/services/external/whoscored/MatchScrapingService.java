@@ -1,6 +1,5 @@
 package unq.dapp.grupoj.soccergenius.services.external.whoscored;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,13 +18,11 @@ public class MatchScrapingService extends WebScrapingService {
 
 
     public String findMatchLink(String teamName1, String teamName2){
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         String url = BASE_URL + "/regions/206/tournaments/4/espa%C3%B1a-laliga";
         String matchUrl = null;
         try {
-            driver.navigate().to(url);
+            driver = setupDriverAndNavigate(url);
 
             // Find all match fixtures
             List<WebElement> matches = driver.findElements(By.className("Match-module_match__XlKTY"));
@@ -54,23 +51,22 @@ public class MatchScrapingService extends WebScrapingService {
         } catch (Exception e) {
             throw new ScrappingException("Error scraping match links: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
         return matchUrl;
     }
 
     public List<Match> getPreviousMeetings(String teamName1, String teamName2) {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         List<Match> matches = new ArrayList<>();
         String matchLink = findMatchLink(teamName1, teamName2);
         if (matchLink == null) {
-            driver.quit();
             return matches;
         }
         try {
-            driver.navigate().to(matchLink);
+            driver = setupDriverAndNavigate(matchLink);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("previous-meetings-grid")));
             WebElement grid = driver.findElement(By.id("previous-meetings-grid"));
@@ -99,7 +95,9 @@ public class MatchScrapingService extends WebScrapingService {
         } catch (Exception e) {
             throw new ScrappingException("Error scraping previous meetings: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 
@@ -164,29 +162,32 @@ public class MatchScrapingService extends WebScrapingService {
     }
 
     private String extractWinner(WebElement row, String homeTeam, String awayTeam, String homeScore, String awayScore) {
-        try {
-            return row.findElement(By.cssSelector(".horizontal-match-display.team.home.winner .team-link")).getText();
-        } catch (Exception eHomeWinner) {
+        List<String> selectors = List.of(
+                ".horizontal-match-display.team.home.winner .team-link",
+                ".horizontal-match-display.team.away.winner .team-link",
+                ".stacked-teams-display .team.winner .team-link"
+        );
+
+        for (String selector : selectors) {
             try {
-                return row.findElement(By.cssSelector(".horizontal-match-display.team.away.winner .team-link")).getText();
-            } catch (Exception eAwayWinner) {
-                try {
-                    return row.findElement(By.cssSelector(".stacked-teams-display .team.winner .team-link")).getText();
-                } catch (Exception eStackedWinner) {
-                    if (!homeScore.isEmpty() && !awayScore.isEmpty() && !homeTeam.isEmpty() && !awayTeam.isEmpty()) {
-                        try {
-                            int hS = Integer.parseInt(homeScore);
-                            int aS = Integer.parseInt(awayScore);
-                            if (hS > aS) {
-                                return homeTeam;
-                            } else if (aS > hS) {
-                                return awayTeam;
-                            }
-                        } catch (NumberFormatException nfe) {
-                            // Ignorar, devolver Draw
-                        }
-                    }
+                return row.findElement(By.cssSelector(selector)).getText();
+            } catch (Exception ignored) {
+                // Continuar con el siguiente selector
+            }
+        }
+
+        // Si no se encuentra el ganador por selector, intentar por comparación de scores
+        if (!homeScore.isEmpty() && !awayScore.isEmpty() && !homeTeam.isEmpty() && !awayTeam.isEmpty()) {
+            try {
+                int hS = Integer.parseInt(homeScore);
+                int aS = Integer.parseInt(awayScore);
+                if (hS > aS) {
+                    return homeTeam;
+                } else if (aS > hS) {
+                    return awayTeam;
                 }
+            } catch (NumberFormatException nfe) {
+                // Ignorar, devolver Draw si los scores no son números válidos
             }
         }
         return "Draw";

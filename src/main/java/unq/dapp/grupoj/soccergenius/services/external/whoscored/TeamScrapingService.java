@@ -1,6 +1,5 @@
 package unq.dapp.grupoj.soccergenius.services.external.whoscored;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,12 +18,10 @@ import java.util.List;
 public class TeamScrapingService extends WebScrapingService {
 
     public List<String> getPlayersIdsFromTeam(String teamName, String country) {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         try {
             String urlTmp = BASE_URL + "/search/?t=" + teamName;
-            driver.navigate().to(urlTmp);
+            driver = setupDriverAndNavigate(urlTmp);
 
             WebElement divResult = driver.findElement(By.className("search-result"));
             WebElement teamsTable = divResult.findElement(By.xpath("./table[1]"));
@@ -63,62 +60,77 @@ public class TeamScrapingService extends WebScrapingService {
 
             return players;
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 
     public int getCurrentPositionOnLeague(int teamId){
         String url = BASE_URL + "/regions/206/tournaments/4/seasons/6960/españa-laliga";
-
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         try {
-            driver.navigate().to(url);
+            driver = setupDriverAndNavigate(url);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
             WebElement tableBody = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("standings-15375-content")));
-
             List<WebElement> rows = tableBody.findElements(By.tagName("tr"));
+
             for (WebElement row : rows) {
-                String currentRowTeamIdStr = row.getAttribute("data-team-id");
-
-                if (currentRowTeamIdStr != null && !currentRowTeamIdStr.isEmpty()) {
-                    try {
-                        int currentRowTeamId = Integer.parseInt(currentRowTeamIdStr);
-
-                        if (currentRowTeamId == teamId) {
-                            WebElement firstCell = row.findElement(By.xpath("./td[1]"));
-                            WebElement positionSpan = firstCell.findElement(By.tagName("span"));
-
-                            String positionText = positionSpan.getText().trim();
-                            if (!positionText.isEmpty()) {
-                                return Integer.parseInt(positionText);
-                            } else {
-                                throw new TeamNotFoundException("Team ID " + teamId + " has no position in league standings.");
-                            }
-                        }
-                    } catch (Exception e) {
-                        throw new ScrappingException("Error parsing team ID from row: " + e.getMessage());
-                    }
+                Integer position = getPositionFromRowIfTeamMatches(row, teamId);
+                if (position != null) {
+                    return position;
                 }
             }
-            throw new TeamNotFoundException("Team ID " + teamId + " not found in league standings.");
-        } catch (Exception e) {
+            // Si el bucle se completa, el equipo no se encontró entre las filas con ID de equipo válidos y coincidentes
+            throw new TeamNotFoundException("Team ID " + teamId + " not found in league standings after checking all rows.");
+        } catch (TeamNotFoundException | ScrappingException e) { // Captura excepciones específicas del auxiliar o la final
+            throw e; // Vuelve a lanzarlas ya que son específicas
+        } catch (Exception e) { // Captura otras posibles excepciones de WebDriver (por ejemplo, tiempo de espera, elemento no encontrado para tableBody)
             throw new ScrappingException("Error scraping current position on league: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
+    }
+
+    private Integer getPositionFromRowIfTeamMatches(WebElement row, int teamIdToFind) throws ScrappingException, TeamNotFoundException {
+        String currentRowTeamIdStr = row.getAttribute("data-team-id");
+
+        if (currentRowTeamIdStr != null && !currentRowTeamIdStr.isEmpty()) {
+            int currentRowTeamId;
+            try {
+                currentRowTeamId = Integer.parseInt(currentRowTeamIdStr);
+            } catch (NumberFormatException e) {
+                throw new ScrappingException("Error parsing team ID from row attribute '" + currentRowTeamIdStr + "': " + e.getMessage());
+            }
+
+            if (currentRowTeamId == teamIdToFind) {
+                WebElement firstCell = row.findElement(By.xpath("./td[1]"));
+                WebElement positionSpan = firstCell.findElement(By.tagName("span"));
+                String positionText = positionSpan.getText().trim();
+
+                if (!positionText.isEmpty()) {
+                    try {
+                        return Integer.parseInt(positionText);
+                    } catch (NumberFormatException e) {
+                        throw new ScrappingException("Error parsing position text '" + positionText + "' from row: " + e.getMessage());
+                    }
+                } else {
+                    // Esta excepción específica indica que se encontró el equipo, pero su posición no estaba listada.
+                    throw new TeamNotFoundException("Team ID " + teamIdToFind + " found, but has no position text in league standings.");
+                }
+            }
+        }
+        return null; // La fila no corresponde a teamIdToFind o no tiene el atributo data-team-id
     }
 
     public double getCurrentRankingOfTeam(int teamId) {
         String url = BASE_URL + "/teams/" + teamId;
-
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         try{
-            driver.navigate().to(url);
+            driver = setupDriverAndNavigate(url);
 
             // Wait for the table to load
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
@@ -141,42 +153,44 @@ public class TeamScrapingService extends WebScrapingService {
         } catch (Exception e) {
             throw new ScrappingException("Error scraping current ranking of team: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 
     public Team scrapTeamDataById(int teamId) {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         String teamName;
         String leagueName;
         String countryName;
 
         String url = BASE_URL + "/teams/" + teamId;
-        driver.navigate().to(url);
+        try {
+            driver = setupDriverAndNavigate(url);
 
-        WebElement teamNameSpan = driver.findElement(By.className("team-header-name"));
-        teamName = teamNameSpan.getText();
+            WebElement teamNameSpan = driver.findElement(By.className("team-header-name"));
+            teamName = teamNameSpan.getText();
 
-        WebElement leagueHref = driver.findElement(By.cssSelector("#breadcrumb-nav a"));
-        leagueName = leagueHref.getText();
+            WebElement leagueHref = driver.findElement(By.cssSelector("#breadcrumb-nav a"));
+            leagueName = leagueHref.getText();
 
-        WebElement countrySpan = driver.findElement(By.cssSelector(".iconize.iconize-icon-left"));
-        countryName = countrySpan.getText();
-
-        driver.quit();
+            WebElement countrySpan = driver.findElement(By.cssSelector(".iconize.iconize-icon-left"));
+            countryName = countrySpan.getText();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
 
         return new Team(teamId, teamName, countryName, leagueName);
     }
 
     public int scrapActualTeamFromPlayer(int playerId) {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        WebDriver driver = null;
         String url = BASE_URL + "/players/" + playerId;
         try {
-            driver.navigate().to(url);
+            driver = setupDriverAndNavigate(url);
 
             WebElement teamElement = driver.findElement(By.className("team-link"));
             String href = teamElement.getAttribute("href");
@@ -187,7 +201,9 @@ public class TeamScrapingService extends WebScrapingService {
         } catch (Exception e) {
             throw new ScrappingException("Error scraping team data: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 

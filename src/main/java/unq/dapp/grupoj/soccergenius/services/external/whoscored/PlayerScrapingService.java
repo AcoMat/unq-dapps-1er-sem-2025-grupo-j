@@ -1,6 +1,5 @@
 package unq.dapp.grupoj.soccergenius.services.external.whoscored;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,14 +18,23 @@ import java.util.List;
 @Service
 public class PlayerScrapingService extends WebScrapingService{
 
+    private static final String PLAYERS_URL_SUFFIX = "/players/";
+
+    private double extractRatingFromPage(WebDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
+
+        WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
+        WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
+        String ratingText = ratingCell.getText();
+        return Double.parseDouble(ratingText);
+    }
+
     public Player scrapPlayerData(int playerId) {
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
-        String url = BASE_URL + "/players/" + playerId;
+        String url = BASE_URL + PLAYERS_URL_SUFFIX + playerId;
+        WebDriver driver = null;
         try{
-
-            driver.navigate().to(url);
+            driver = setupDriverAndNavigate(url);
 
             List<WebElement> errorMessages = driver.findElements(
                     By.xpath("//*[contains(text(), 'The page you requested does not exist')]"));
@@ -69,64 +77,41 @@ public class PlayerScrapingService extends WebScrapingService{
         } catch (Exception e) {
             throw new ScrappingException("Error scraping player data: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 
     public CurrentParticipationsSummary getCurrentParticipationInfo(Player player) {
-        String url = BASE_URL + "/players/" + player.getId();
-
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        String url = BASE_URL + PLAYERS_URL_SUFFIX + player.getId();
+        WebDriver driver = null;
         try {
-            driver.navigate().to(url);
-
-            // Wait for the table to load
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
-
-            // Get the last row (Total/Promedio)
-            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
-
-            // Get the rating cell (last cell in the row)
-            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
-            String ratingText = ratingCell.getText();
-
-            double rating = Double.parseDouble(ratingText);
-
+            driver = setupDriverAndNavigate(url);
+            double rating = extractRatingFromPage(driver);
             return new CurrentParticipationsSummary(player, rating);
         } catch (Exception e) {
             throw new ScrappingException("Error scraping player participation info: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 
     public HistoricalParticipationsSummary getHistoryInfo(Player player) {
-        String url = BASE_URL + "/players/" + player.getId() + "/history";
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver = createWebDriver();
-
+        String url = BASE_URL + PLAYERS_URL_SUFFIX + player.getId() + "/history";
+        WebDriver driver = null;
         try{
-            driver.navigate().to(url);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-player-stats-summary-grid")));
-
-            // Get the last row (Total/Promedio)
-            WebElement totalRow = driver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"));
-
-            // Get the rating cell (last cell in the row)
-            WebElement ratingCell = totalRow.findElement(By.xpath("./td[@class='rating']/strong"));
-            String ratingText = ratingCell.getText();
-
-            double rating = Double.parseDouble(ratingText);
-
+            driver = setupDriverAndNavigate(url);
+            double rating = extractRatingFromPage(driver);
             return new HistoricalParticipationsSummary(player, rating);
         } catch (Exception e) {
             throw new ScrappingException("Error scraping player history info: " + e.getMessage());
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 }
