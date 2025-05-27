@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.4'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id "org.sonarqube" version "5.1.0.4882"
 }
 
 group = 'unq.dapp.grupoj'
@@ -13,27 +15,52 @@ java {
 	}
 }
 
+sonarqube {
+	properties {
+		property "sonar.projectKey", "AcoMat_unq-dapps-1er-sem-2025-grupo-j"
+		property "sonar.organization", "acomat"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+	}
+}
+
 repositories {
 	mavenCentral()
 }
 
 test {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+
 
 dependencies {
 	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.seleniumhq.selenium:selenium-java:4.11.0'
 	implementation 'io.github.bonigarcia:webdrivermanager:5.4.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
 	implementation("org.springframework.security:spring-security-crypto:6.4.4")
 	implementation 'com.auth0:java-jwt:4.5.0'
 	implementation("org.springframework.boot:spring-boot-starter-validation:3.4.4")
+
+	// Gen IA
+	implementation 'com.google.genai:google-genai:1.0.0'
 
 	compileOnly "org.projectlombok:lombok:1.18.34"
 	annotationProcessor 'org.projectlombok:lombok:1.18.34'
@@ -44,6 +71,8 @@ dependencies {
 
 	//TESTING
 	testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.4")
+	testImplementation 'io.rest-assured:spring-mock-mvc:3.0.0'
+	testImplementation 'org.springframework.security:spring-security-test'
 
 	//logging
 	implementation("org.springframework.boot:spring-boot-starter-logging")

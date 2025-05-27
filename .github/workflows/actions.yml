@@ -31,7 +31,10 @@ jobs:
       - name: Checkout repository
         # 'uses' indica que este paso utiliza una "Action" predefinida. 'actions/checkout@v4' es la action oficial de GitHub para descargar el código fuente del repositorio en el runner.
         uses: actions/checkout@v4
-
+        with:
+          # Fetch all history for all branches and tags.
+          # Necesario para que SonarCloud analice correctamente las Pull Requests y el código nuevo.
+          fetch-depth: 0
       # Paso 2: Configura el entorno de Java (JDK).
       - name: Set up JDK 21
         # Utiliza la action 'actions/setup-java@v4' para instalar una versión específica del JDK.
@@ -55,9 +58,19 @@ jobs:
       - name: Build and Test with Gradle
         # Ejecuta el comando './gradlew build' usando el wrapper de Gradle. Este comando típicamente compila el código fuente, ejecuta los tests definidos en la tarea 'test', y ensambla los artefactos (como un archivo JAR o WAR).
         run: ./gradlew build
-
       # Comentarios indicando pasos opcionales que podrías añadir después, como subir reportes de tests, construir imágenes Docker o desplegar la aplicación.
       # (Opcional) Puedes añadir más pasos aquí, como:
       # - Subir artefactos de test (Jacoco, Surefire reports via Gradle plugins)
       # - Construir una imagen Docker
       # - Desplegar la aplicación
+      # Paso 5: Analizar el código con SonarCloud usando el plugin de Gradle
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2.1.1 # Se recomienda usar una versión específica
+        steps:
+          - uses: actions/checkout@v3
+            with:
+              fetch-depth: 0
+          - name: SonarQubeScan
+            uses: SonarSource/sonarqube-scan-action@v4
+            env:
+              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
