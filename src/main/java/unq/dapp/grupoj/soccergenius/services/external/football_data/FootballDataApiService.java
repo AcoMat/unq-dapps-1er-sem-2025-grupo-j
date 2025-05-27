@@ -21,7 +21,7 @@ public class FootballDataApiService {
     private final RestTemplate restTemplate;
     private final Map<Integer, Integer> whoScoredToFootballDataTeamIdMap;
 
-    @Value("${football-data.api.key}")
+    @Value("${FOOTBALL_DATA_API_KEY}")
     private String apiKey;
 
     @Value("${football-data.api.base-url:http://api.football-data.org/v4}")

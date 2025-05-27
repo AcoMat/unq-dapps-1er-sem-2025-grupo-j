@@ -3,15 +3,15 @@ package unq.dapp.grupoj.soccergenius.services.player;
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.repository.PlayerRepository;
-import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.PlayerScrapingService;
 
 @Service
 public class PlayerService {
 
     private final PlayerRepository _playerRepository;
-    private final WebScrapingService _webScrapingService;
+    private final PlayerScrapingService _webScrapingService;
 
-    public PlayerService(PlayerRepository playerRepository,WebScrapingService webScrapingService) {
+    public PlayerService(PlayerRepository playerRepository,PlayerScrapingService webScrapingService) {
         this._playerRepository = playerRepository;
         this._webScrapingService = webScrapingService;
     }

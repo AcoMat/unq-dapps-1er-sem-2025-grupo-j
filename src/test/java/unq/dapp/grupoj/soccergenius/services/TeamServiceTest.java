@@ -16,7 +16,7 @@ import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
-import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamServiceImpl;
 
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class TeamServiceTest {
     @Mock
-    private WebScrapingService webScrapingService;
+    private TeamScrapingService webScrapingService;
 
     @Mock
     private PlayerService playerService; // Injected but not used by the methods under test

@@ -7,7 +7,8 @@ import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchDto;
 import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
-import unq.dapp.grupoj.soccergenius.services.external.whoscored.WebScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.MatchScrapingService;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
@@ -19,12 +20,19 @@ public class MatchService {
     
     private final TeamService teamService;
     private final FootballDataApiService footballDataApiService;
-    private final WebScrapingService webScrapingService;
+    private final MatchScrapingService matchScrapingService;
+    private final TeamScrapingService teamScrapingService;
 
-    public MatchService(TeamService teamService, FootballDataApiService footballDataApiService, WebScrapingService webScrapingService) {
+    public MatchService(
+            TeamService teamService,
+            FootballDataApiService footballDataApiService,
+            MatchScrapingService matchScrapingService,
+            TeamScrapingService teamScrapingService
+    ) {
         this.teamService = teamService;
         this.footballDataApiService = footballDataApiService;
-        this.webScrapingService = webScrapingService;
+        this.matchScrapingService = matchScrapingService;
+        this.teamScrapingService = teamScrapingService;
     }
 
     /**
@@ -129,13 +137,13 @@ public class MatchService {
                 .limit(5)
                 .toList();
 
-        double rankTeam1 = webScrapingService.getCurrentRankingOfTeam(team1Id);
-        double rankTeam2 = webScrapingService.getCurrentRankingOfTeam(team2Id);
+        double rankTeam1 = teamScrapingService.getCurrentRankingOfTeam(team1Id);
+        double rankTeam2 = teamScrapingService.getCurrentRankingOfTeam(team2Id);
 
-        int team1Position = webScrapingService.getCurrentPositionOnLeague(team1Id);
-        int team2Position = webScrapingService.getCurrentPositionOnLeague(team2Id);
+        int team1Position = teamScrapingService.getCurrentPositionOnLeague(team1Id);
+        int team2Position = teamScrapingService.getCurrentPositionOnLeague(team2Id);
 
-        List<Match> lastMatchesBetweenTeams = webScrapingService.getPreviousMeetings(team1.getName(), team2.getName());
+        List<Match> lastMatchesBetweenTeams = matchScrapingService.getPreviousMeetings(team1.getName(), team2.getName());
         
         logger.debug("Convirtiendo datos de partidos a formato string para procesamiento");
         String homeMatchesTeam1String = convertMatchesToString(lastHomeMatchesTeam1);
