@@ -59,7 +59,26 @@ public class DataSeeder implements CommandLineRunner {
         if(teamRepository.existsById(63)) {
             logger.info("Team already exists, skipping registration.");
         } else {
+            teamService.getTeamFromLaLigaById(51);
+            teamService.getTeamFromLaLigaById(52);
+            teamService.getTeamFromLaLigaById(53);
+            teamService.getTeamFromLaLigaById(54);
+            teamService.getTeamFromLaLigaById(55);
+            teamService.getTeamFromLaLigaById(58);
+            teamService.getTeamFromLaLigaById(60);
+            teamService.getTeamFromLaLigaById(62);
             teamService.getTeamFromLaLigaById(63);
+            teamService.getTeamFromLaLigaById(65);
+            teamService.getTeamFromLaLigaById(64);
+            teamService.getTeamFromLaLigaById(67);
+            teamService.getTeamFromLaLigaById(68);
+            teamService.getTeamFromLaLigaById(70);
+            teamService.getTeamFromLaLigaById(131);
+            teamService.getTeamFromLaLigaById(839);
+            teamService.getTeamFromLaLigaById(819);
+            teamService.getTeamFromLaLigaById(825);
+            teamService.getTeamFromLaLigaById(838);
+            teamService.getTeamFromLaLigaById(2783);
         }
 
         if(playerRepository.existsById(365409)) {

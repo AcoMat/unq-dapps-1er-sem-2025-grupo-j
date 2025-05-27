@@ -16,8 +16,8 @@ import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
+import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
-import unq.dapp.grupoj.soccergenius.services.scrapping.WebScrapingService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamServiceImpl;
 
 import java.time.ZonedDateTime;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class TeamServiceTest {
     @Mock
-    private WebScrapingService webScrapingService;
+    private TeamScrapingService webScrapingService;
 
     @Mock
     private PlayerService playerService; // Injected but not used by the methods under test
@@ -176,15 +176,7 @@ public class TeamServiceTest {
         int teamId = 789;
 
         // Mocking first API call (get teams from competition)
-        Team teamInCompetition = new Team();
-        teamInCompetition.setId(teamId);
-        teamInCompetition.setName("FC Test"); // Exact match for simplicity
-        List<Team> teamsList = Collections.singletonList(teamInCompetition);
-        String dummyCompetitionName = "Test Competition";
-        String dummyCompetitionId = "COMP_TEST_001";
-        CompetitionDTO competitionDTO = new CompetitionDTO(dummyCompetitionName, dummyCompetitionId, teamsList);
-
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
+        ResponseEntity<CompetitionDTO> competitionResponseEntity = getCompetitionDTOResponseEntity(teamId);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CompetitionDTO.class)))
                 .thenReturn(competitionResponseEntity);
 
@@ -214,6 +206,18 @@ public class TeamServiceTest {
         assertEquals("Unknown", upcomingMatches.getFirst().getLocalTeam());
         assertEquals("Unknown", upcomingMatches.getFirst().getVisitorTeam());
         assertEquals("Unknown", upcomingMatches.getFirst().getCompetition());
+    }
+
+    private static ResponseEntity<CompetitionDTO> getCompetitionDTOResponseEntity(int teamId) {
+        Team teamInCompetition = new Team();
+        teamInCompetition.setId(teamId);
+        teamInCompetition.setName("FC Test"); // Exact match for simplicity
+        List<Team> teamsList = Collections.singletonList(teamInCompetition);
+        String dummyCompetitionName = "Test Competition";
+        String dummyCompetitionId = "COMP_TEST_001";
+        CompetitionDTO competitionDTO = new CompetitionDTO(dummyCompetitionName, dummyCompetitionId, teamsList);
+
+        return new ResponseEntity<>(competitionDTO, HttpStatus.OK);
     }
 
     @Test
