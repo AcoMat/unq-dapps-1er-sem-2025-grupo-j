@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import unq.dapp.grupoj.soccergenius.model.HistoryLog;
 import unq.dapp.grupoj.soccergenius.repository.HistoryLogRespository;
-import unq.dapp.grupoj.soccergenius.services.historyLog.HistoryLogServiceImpl;
+import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

@@ -13,13 +13,4 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FootballApiResponseDTO {
     private List<MatchDTO> matches;
-
-//    // Getters y Setters
-//    public List<MatchDTO> getMatches() {
-//        return matches;
-//    }
-//
-//    public void setMatches(List<MatchDTO> matches) {
-//        this.matches = matches;
-//    }
 }

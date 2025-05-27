@@ -20,7 +20,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    List<String> PUBLIC_PATHS = List.of("/auth/login", "/auth/register", "/swagger-ui/**", "/v3/api-docs/**");
+    List<String> publicPaths = List.of("/auth/login", "/auth/register", "/swagger-ui/**", "/v3/api-docs/**");
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers((PUBLIC_PATHS.toArray(new String[0]))).permitAll()
+                        .requestMatchers((publicPaths.toArray(new String[0]))).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling

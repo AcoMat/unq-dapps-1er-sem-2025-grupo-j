@@ -8,25 +8,25 @@ import unq.dapp.grupoj.soccergenius.services.external.whoscored.PlayerScrapingSe
 @Service
 public class PlayerService {
 
-    private final PlayerRepository _playerRepository;
-    private final PlayerScrapingService _webScrapingService;
+    private final PlayerRepository playerRepository;
+    private final PlayerScrapingService webScrapingService;
 
     public PlayerService(PlayerRepository playerRepository,PlayerScrapingService webScrapingService) {
-        this._playerRepository = playerRepository;
-        this._webScrapingService = webScrapingService;
+        this.playerRepository = playerRepository;
+        this.webScrapingService = webScrapingService;
     }
 
     public Player getPlayer(int playerId) {
         //TODO: check last update and refesh data
-        Player player = _playerRepository.findById(playerId).orElse(null);
+        Player player = playerRepository.findById(playerId).orElse(null);
         if (player == null) {
-            player = _webScrapingService.scrapPlayerData(playerId);
+            player = webScrapingService.scrapPlayerData(playerId);
             if (player == null) {
                 return null;
             }
-            player.setCurrentParticipationsSummary(_webScrapingService.getCurrentParticipationInfo(player));
-            player.setHistory(_webScrapingService.getHistoryInfo(player));
-            _playerRepository.save(player);
+            player.setCurrentParticipationsSummary(webScrapingService.getCurrentParticipationInfo(player));
+            player.setHistory(webScrapingService.getHistoryInfo(player));
+            playerRepository.save(player);
         }
         return player;
     }

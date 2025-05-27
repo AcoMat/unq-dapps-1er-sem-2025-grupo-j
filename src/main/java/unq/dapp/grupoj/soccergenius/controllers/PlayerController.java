@@ -24,11 +24,11 @@ import java.util.logging.Logger;
 @Tag(name = "Player", description = "Player management APIs")
 public class PlayerController {
 
-    private final PlayerService _playerService;
-    private final Logger _logger = Logger.getLogger(PlayerController.class.getName());
+    private final PlayerService playerService;
+    private final Logger logger = Logger.getLogger(PlayerController.class.getName());
 
     public PlayerController(PlayerService playerService) {
-        this._playerService = playerService;
+        this.playerService = playerService;
     }
 
     @GetMapping("/performance/{playerId}")
@@ -38,7 +38,7 @@ public class PlayerController {
             @ApiResponse(responseCode = "404", description = "Player not found")
     })
     public ResponseEntity<String> getPlayerPerformance(@PathVariable int playerId) {
-        String performance = _playerService.getPlayerPerformance(playerId);
+        String performance = playerService.getPlayerPerformance(playerId);
         return ResponseEntity.ok(performance);
     }
 
@@ -49,9 +49,9 @@ public class PlayerController {
             @ApiResponse(responseCode = "404", description = "Player not found")
     })
     public ResponseEntity<Object> getPlayer(@PathVariable int playerId) {
-        Player player = _playerService.getPlayer(playerId);
+        Player player = playerService.getPlayer(playerId);
         if(player == null) {
-            _logger.warning("Player not found with id: " + playerId);
+            logger.log(java.util.logging.Level.WARNING, "Player not found with id: {0}", playerId);
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(player);

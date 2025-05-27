@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import unq.dapp.grupoj.soccergenius.model.HistoryLog;
-import unq.dapp.grupoj.soccergenius.services.historyLog.HistoryLogService;
+import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogService;
 
 import java.time.LocalDateTime;
 

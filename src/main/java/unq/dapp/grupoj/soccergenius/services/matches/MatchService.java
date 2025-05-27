@@ -3,6 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.matches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unq.dapp.grupoj.soccergenius.exceptions.GenAiResponseException;
 import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchDto;
@@ -144,14 +145,14 @@ public class MatchService {
         int team2Position = teamScrapingService.getCurrentPositionOnLeague(team2Id);
 
         List<Match> lastMatchesBetweenTeams = matchScrapingService.getPreviousMeetings(team1.getName(), team2.getName());
-        
+
         logger.debug("Convirtiendo datos de partidos a formato string para procesamiento");
         String homeMatchesTeam1String = convertMatchesToString(lastHomeMatchesTeam1);
         String awayMatchesTeam1String = convertMatchesToString(lastAwayMatchesTeam1);
         String homeMatchesTeam2String = convertMatchesToString(lastHomeMatchesTeam2);
         String awayMatchesTeam2String = convertMatchesToString(lastAwayMatchesTeam2);
         String previousMeetingsString = formatPreviousMeetings(lastMatchesBetweenTeams);
-        
+
         logger.info("Preparando solicitud a Gemini AI para predicción de partido entre {} y {}", team1.getName(), team2.getName());
         Client client = new Client();
 
@@ -161,26 +162,25 @@ public class MatchService {
                     client.models.generateContent(
                             "gemini-2.0-flash",
                             "Basándote en los siguientes datos, calcula SOLAMENTE las probabilidades para el partido " +
-                            team1.getName() + " vs " + team2.getName() + ".\n\n" +
-                            "Datos:\n" +
-                            "- Últimos partidos como local de " + team1.getName() + ": " + homeMatchesTeam1String + "\n" +
-                            "- Últimos partidos como visitante de " + team1.getName() + ": " + awayMatchesTeam1String + "\n" +
-                            "- Últimos partidos como local de " + team2.getName() + ": " + homeMatchesTeam2String + "\n" +
-                            "- Últimos partidos como visitante de " + team2.getName() + ": " + awayMatchesTeam2String + "\n" +
-                            "- " + team1.getName() + ": Posición " + team1Position + " en la liga, rating " + rankTeam1 + "\n" +
-                            "- " + team2.getName() + ": Posición " + team2Position + " en la liga, rating " + rankTeam2 + "\n" +
-                            "- Historial de enfrentamientos: " + previousMeetingsString + "\n\n" +
-                            "RESPONDE USANDO EXACTAMENTE ESTE FORMATO (solo números):\n" +
-                            "victoria_local%:empate%:victoria_visitante%\n\n" +
-                            "Ejemplo: 45:25:30",
+                                    team1.getName() + " vs " + team2.getName() + ".\n\n" +
+                                    "Datos:\n" +
+                                    "- Últimos partidos como local de " + team1.getName() + ": " + homeMatchesTeam1String + "\n" +
+                                    "- Últimos partidos como visitante de " + team1.getName() + ": " + awayMatchesTeam1String + "\n" +
+                                    "- Últimos partidos como local de " + team2.getName() + ": " + homeMatchesTeam2String + "\n" +
+                                    "- Últimos partidos como visitante de " + team2.getName() + ": " + awayMatchesTeam2String + "\n" +
+                                    "- " + team1.getName() + ": Posición " + team1Position + " en la liga, rating " + rankTeam1 + "\n" +
+                                    "- " + team2.getName() + ": Posición " + team2Position + " en la liga, rating " + rankTeam2 + "\n" +
+                                    "- Historial de enfrentamientos: " + previousMeetingsString + "\n\n" +
+                                    "RESPONDE USANDO EXACTAMENTE ESTE FORMATO (solo números):\n" +
+                                    "victoria_local%:empate%:victoria_visitante%\n\n" +
+                                    "Ejemplo: 45:25:30",
                             null);
 
             String result = response.text();
             logger.info("Predicción recibida de Gemini AI para partido {}-{}: {}", team1.getName(), team2.getName(), result);
             return result;
         } catch (Exception e) {
-            logger.error("Error al obtener predicción de Gemini AI: {}", e.getMessage(), e);
-            throw e;
+            throw new GenAiResponseException("Error al obtener la predicción de Gemini AI: " + e.getMessage());
         }
     }
 }

@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.services.historyLog;
+package unq.dapp.grupoj.soccergenius.services.history_log;
 
 import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.model.HistoryLog;

@@ -45,9 +45,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        logger.info("##############################");
         logger.info("Seeding data...");
-        logger.info("##############################");
 
         if(usersRepository.existsByEmail("john.doe@mail.com")) {
             logger.info("User already exists, skipping registration.");
@@ -59,26 +57,66 @@ public class DataSeeder implements CommandLineRunner {
         if(teamRepository.existsById(63)) {
             logger.info("Team already exists, skipping registration.");
         } else {
-            teamService.getTeamFromLaLigaById(51);
-            teamService.getTeamFromLaLigaById(52);
-            teamService.getTeamFromLaLigaById(53);
-            teamService.getTeamFromLaLigaById(54);
-            teamService.getTeamFromLaLigaById(55);
-            teamService.getTeamFromLaLigaById(58);
-            teamService.getTeamFromLaLigaById(60);
-            teamService.getTeamFromLaLigaById(62);
-            teamService.getTeamFromLaLigaById(63);
-            teamService.getTeamFromLaLigaById(65);
-            teamService.getTeamFromLaLigaById(64);
-            teamService.getTeamFromLaLigaById(67);
-            teamService.getTeamFromLaLigaById(68);
-            teamService.getTeamFromLaLigaById(70);
-            teamService.getTeamFromLaLigaById(131);
-            teamService.getTeamFromLaLigaById(839);
-            teamService.getTeamFromLaLigaById(819);
-            teamService.getTeamFromLaLigaById(825);
-            teamService.getTeamFromLaLigaById(838);
-            teamService.getTeamFromLaLigaById(2783);
+            if(!teamRepository.existsById(51)) {
+                teamService.getTeamFromLaLigaById(51);
+            }
+            if(!teamRepository.existsById(52)) {
+                teamService.getTeamFromLaLigaById(52);
+            }
+            if(!teamRepository.existsById(53)) {
+                teamService.getTeamFromLaLigaById(53);
+            }
+            if(!teamRepository.existsById(54)) {
+                teamService.getTeamFromLaLigaById(54);
+            }
+            if(!teamRepository.existsById(55)) {
+                teamService.getTeamFromLaLigaById(55);
+            }
+            if(!teamRepository.existsById(58)) {
+                teamService.getTeamFromLaLigaById(58);
+            }
+            if(!teamRepository.existsById(60)) {
+                teamService.getTeamFromLaLigaById(60);
+            }
+            if(!teamRepository.existsById(62)) {
+                teamService.getTeamFromLaLigaById(62);
+            }
+            if(!teamRepository.existsById(63)) {
+                teamService.getTeamFromLaLigaById(63);
+            }
+            if(!teamRepository.existsById(65)) {
+                teamService.getTeamFromLaLigaById(65);
+            }
+            if(!teamRepository.existsById(64)) {
+                teamService.getTeamFromLaLigaById(64);
+            }
+            if(!teamRepository.existsById(67)) {
+                teamService.getTeamFromLaLigaById(67);
+            }
+            if(!teamRepository.existsById(68)) {
+                teamService.getTeamFromLaLigaById(68);
+            }
+            if(!teamRepository.existsById(70)) {
+                teamService.getTeamFromLaLigaById(70);
+            }
+            if(!teamRepository.existsById(131)) {
+                teamService.getTeamFromLaLigaById(131);
+            }
+            if(!teamRepository.existsById(839)) {
+                teamService.getTeamFromLaLigaById(839);
+            }
+            if(!teamRepository.existsById(819)) {
+                teamService.getTeamFromLaLigaById(819);
+            }
+            if(!teamRepository.existsById(825)) {
+                teamService.getTeamFromLaLigaById(825);
+            }
+            if(!teamRepository.existsById(838)) {
+                teamService.getTeamFromLaLigaById(838);
+            }
+            if(!teamRepository.existsById(2783)) {
+                teamService.getTeamFromLaLigaById(2783);
+            }
         }
 
         if(playerRepository.existsById(365409)) {
@@ -87,9 +125,6 @@ public class DataSeeder implements CommandLineRunner {
             Player player = playerService.getPlayer(365409);
             playerRepository.save(player);
         }
-
-        logger.info("##############################");
         logger.info("Data seeding completed.");
-        logger.info("##############################");
     }
 }

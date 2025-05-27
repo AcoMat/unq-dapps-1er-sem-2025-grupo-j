@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import unq.dapp.grupoj.soccergenius.model.HistoryLog;
-import unq.dapp.grupoj.soccergenius.services.historyLog.HistoryLogService;
+import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogService;
 
 import java.util.List;
 

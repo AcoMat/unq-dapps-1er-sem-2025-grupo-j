@@ -12,9 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-import unq.dapp.grupoj.soccergenius.interceptor.HistoryLoggingInterceptor;
 import unq.dapp.grupoj.soccergenius.security.JwtAuthenticationFilter;
-import unq.dapp.grupoj.soccergenius.services.historyLog.HistoryLogService;
+import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import java.util.Arrays;

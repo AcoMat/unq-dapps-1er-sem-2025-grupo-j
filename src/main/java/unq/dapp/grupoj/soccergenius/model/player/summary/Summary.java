@@ -28,10 +28,10 @@ public abstract class Summary {
 
     private double rating;
 
-    public Summary() {
+    protected Summary() {
     }
 
-    public Summary(Player player, double rating) {
+    protected Summary(Player player, double rating) {
         this.id = player.getId();
         this.player = player;
         this.rating = rating;
