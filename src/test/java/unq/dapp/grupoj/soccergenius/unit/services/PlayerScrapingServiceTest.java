@@ -1,6 +1,7 @@
-package unq.dapp.grupoj.soccergenius.services;
+package unq.dapp.grupoj.soccergenius.unit.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,6 +11,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.test.context.ActiveProfiles;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
@@ -25,6 +27,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("unit")
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 public class PlayerScrapingServiceTest {
     @Mock
