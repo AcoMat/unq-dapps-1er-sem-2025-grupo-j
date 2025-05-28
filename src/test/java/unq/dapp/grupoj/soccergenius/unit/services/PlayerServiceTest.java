@@ -1,11 +1,13 @@
-package unq.dapp.grupoj.soccergenius.services;
+package unq.dapp.grupoj.soccergenius.unit.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import unq.dapp.grupoj.soccergenius.model.player.Player;
 import unq.dapp.grupoj.soccergenius.model.player.summary.CurrentParticipationsSummary;
 import unq.dapp.grupoj.soccergenius.model.player.summary.HistoricalParticipationsSummary;
@@ -20,6 +22,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("unit")
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 public class PlayerServiceTest {
     @Mock

@@ -1,11 +1,13 @@
-package unq.dapp.grupoj.soccergenius.services;
+package unq.dapp.grupoj.soccergenius.unit.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import unq.dapp.grupoj.soccergenius.model.HistoryLog;
 import unq.dapp.grupoj.soccergenius.repository.HistoryLogRespository;
 import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogServiceImpl;
@@ -19,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("unit")
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 public class HistoryLogServiceTest {
 

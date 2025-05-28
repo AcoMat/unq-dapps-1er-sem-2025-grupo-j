@@ -64,13 +64,10 @@ jobs:
       # - Construir una imagen Docker
       # - Desplegar la aplicación
       # Paso 5: Analizar el código con SonarCloud usando el plugin de Gradle
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2.1.1 # Se recomienda usar una versión específica
-        steps:
-          - uses: actions/checkout@v3
-            with:
-              fetch-depth: 0
-          - name: SonarQubeScan
-            uses: SonarSource/sonarqube-scan-action@v4
-            env:
-              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan with Gradle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Necesario para la decoración de PRs en SonarCloud (el plugin de Gradle lo usa)
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Token para autenticarse con SonarCloud (el plugin de Gradle lo usa)
+        # Ejecuta la tarea 'sonarqube' de Gradle.
+        # El plugin org.sonarqube en tu build.gradle leerá las variables de entorno GITHUB_TOKEN y SONAR_TOKEN.
+        run: ./gradlew sonar

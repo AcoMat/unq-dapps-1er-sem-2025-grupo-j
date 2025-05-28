@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.controllers;
+package unq.dapp.grupoj.soccergenius.unit.controllers;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import unq.dapp.grupoj.soccergenius.controllers.TeamController;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.security.JwtAuthenticationFilter;
 import unq.dapp.grupoj.soccergenius.services.history_log.HistoryLogService;
