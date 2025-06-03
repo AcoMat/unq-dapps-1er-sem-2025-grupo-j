@@ -13,6 +13,7 @@ import unq.dapp.grupoj.soccergenius.model.Team;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class TeamScrapingService extends WebScrapingService {
@@ -177,12 +178,13 @@ public class TeamScrapingService extends WebScrapingService {
 
             WebElement countrySpan = driver.findElement(By.cssSelector(".iconize.iconize-icon-left"));
             countryName = countrySpan.getText();
+        } catch (Exception e) {
+            throw new TeamNotFoundException("No se pudo encontrar el equipo " + teamId + " o faltan elementos en la página de resultados de búsqueda/equipo.");
         } finally {
             if (driver != null) {
                 driver.quit();
             }
         }
-
         return new Team(teamId, teamName, countryName, leagueName);
     }
 

@@ -23,8 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("e2e")
-@Tag("e2e")
+@ActiveProfiles("unit")
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 public class TeamScrapingServiceTest {
 
@@ -252,7 +252,7 @@ public class TeamScrapingServiceTest {
 
         // Act & Assert
         // This method does not wrap Selenium exceptions in ScrappingException within its try block
-        assertThrows(NoSuchElementException.class, () ->
+        assertThrows(TeamNotFoundException.class, () ->
                 teamScrapingService.scrapTeamDataById(TEAM_ID)
         );
         verify(mockDriver).quit(); // quit() is called in finally
