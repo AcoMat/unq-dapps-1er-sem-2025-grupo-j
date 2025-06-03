@@ -94,4 +94,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This endpoint does not exist, verify the URL");
     }
 
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<String> handleTeamNotFoundException(TeamNotFoundException ex) {
+        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }
