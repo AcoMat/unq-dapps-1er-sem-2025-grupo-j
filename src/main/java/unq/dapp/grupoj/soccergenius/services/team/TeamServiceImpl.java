@@ -1,5 +1,6 @@
 package unq.dapp.grupoj.soccergenius.services.team;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -53,7 +54,10 @@ public class TeamServiceImpl implements TeamService {
             List<String> players = this.webScrapingService.getPlayersIdsFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
-        } catch (Exception e) {
+        }catch (NoSuchElementException e){
+            return List.of();
+        }
+        catch (Exception e) {
             throw new ScrappingException(e.getMessage());
         }
     }
