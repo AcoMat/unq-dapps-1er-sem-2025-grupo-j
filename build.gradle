@@ -174,4 +174,8 @@ dependencies {
 	//logging
 	implementation("org.springframework.boot:spring-boot-starter-logging")
 
+	// metricas
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 }
