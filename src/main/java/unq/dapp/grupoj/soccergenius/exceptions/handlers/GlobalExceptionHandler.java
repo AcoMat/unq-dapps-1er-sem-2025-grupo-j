@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import unq.dapp.grupoj.soccergenius.exceptions.*;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,6 +100,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleTeamNotFoundException(TeamNotFoundException ex) {
         logger.error("Resource not found: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(PlayerNotFoundException.class)
+    public ResponseEntity<Map<String,String>> handlePlayerNotFoundException(PlayerNotFoundException ex) {
+        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyMap());
     }
 
 }
