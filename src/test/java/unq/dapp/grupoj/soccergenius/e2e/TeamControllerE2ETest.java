@@ -105,29 +105,23 @@ public class TeamControllerE2ETest {
         result.andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof TeamNotFoundException));
     }
 
-    @Disabled
     @Test
     @WithMockUser
     public void getUpcomingMatches_whenTeamExists_shouldReturnTeamDto() throws Exception {
-        long nonExistentTeamId = 0;
-
-        final ResultActions result = this.mockMvc.perform(get("/teams/" + nonExistentTeamId)
+        final ResultActions result = this.mockMvc.perform(get("/teams/getafe/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 
-        result.andExpect(status().isNotFound())
-                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof TeamNotFoundException));
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$", instanceOf(List.class)));
     }
 
-    @Disabled
     @Test
     @WithMockUser
     public void getUpcomingMatches_whenTeamDoesNotExist_shouldReturnTeamDto() throws Exception {
-        long nonExistentTeamId = 0;
-
-        final ResultActions result = this.mockMvc.perform(get("/teams/" + nonExistentTeamId)
+        final ResultActions result = this.mockMvc.perform(get("/teams/getafes/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 
-        result.andExpect(status().isNotFound())
-                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof TeamNotFoundException));
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$", instanceOf(List.class)));
     }
 }

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.UnknownContentTypeException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
@@ -73,23 +74,22 @@ public class TeamServiceImpl implements TeamService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<CompetitionDTO> competitionDTOResponseEntity = restTemplate.exchange(apiUrlGetTeams, HttpMethod.GET,entity, CompetitionDTO.class);
-
-        List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
-
-        int idTeam = competitionTeams.stream()
-                .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
-                .findFirst()
-                .map(Team::getId)
-                .orElseThrow(()->new RuntimeException("Equipo no encontrado: " + teamName));
-
-        String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id",String.valueOf(idTeam));
-
-        ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam,HttpMethod.GET,entity,FootballApiResponseDTO.class);
-
-        FootballApiResponseDTO apiResponse = response.getBody();
-
         try {
+            ResponseEntity<CompetitionDTO> competitionDTOResponseEntity = restTemplate.exchange(apiUrlGetTeams, HttpMethod.GET, entity, CompetitionDTO.class);
+            List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
+
+            int idTeam = competitionTeams.stream()
+                    .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
+                    .findFirst()
+                    .map(Team::getId)
+                    .orElseThrow(() -> new RuntimeException("Equipo no encontrado: " + teamName));
+
+            String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED" .replace("id", String.valueOf(idTeam));
+
+            ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam, HttpMethod.GET, entity, FootballApiResponseDTO.class);
+
+            FootballApiResponseDTO apiResponse = response.getBody();
+
             if (apiResponse != null && apiResponse.getMatches() != null) {
                 List<MatchDTO> upcomingMatches = apiResponse.getMatches().stream()
                         .map(matchDto -> {

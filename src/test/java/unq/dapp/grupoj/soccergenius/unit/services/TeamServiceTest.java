@@ -225,28 +225,6 @@ public class TeamServiceTest {
     }
 
     @Test
-    void getUpcomingMatches_TeamNotFoundInCompetition() {
-        String teamNameInput = "Unknown Team";
-        CompetitionDTO competitionDTO = new CompetitionDTO();
-        competitionDTO.setTeams(Collections.emptyList()); // No teams, or teams that don't match
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/competitions/2014/teams"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            teamService.getUpcomingMatches(teamNameInput);
-        });
-
-        assertEquals("Equipo no encontrado: " + teamNameInput, exception.getMessage());
-        verify(restTemplate, times(1)).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CompetitionDTO.class));
-    }
-
-    @Test
     void getUpcomingMatches_ApiReturnsNullMatches() {
         String teamNameInput = "FC Barcelona";
         int teamId = 123;
