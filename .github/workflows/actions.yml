@@ -57,7 +57,6 @@ jobs:
       # Paso 4: Compila el proyecto y ejecuta los tests usando Gradle.
       - name: Build and Test with Gradle
         env:
-#          FOOTBALLDATA_TOKEN: ${{ secrets.FOOTBALLDATA_TOKEN }}
           FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALLDATA_TOKEN }}
           JWT_SECRET_KEY_SOCCERGENIUS: ${{ secrets.JWT_SECRET_KEY_SOCCERGENIUS }}
         # Ejecuta el comando './gradlew build' usando el wrapper de Gradle. Este comando típicamente compila el código fuente, ejecuta los tests definidos en la tarea 'test', y ensambla los artefactos (como un archivo JAR o WAR).
