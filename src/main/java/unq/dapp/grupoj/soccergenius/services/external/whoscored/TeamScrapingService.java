@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
+import unq.dapp.grupoj.soccergenius.model.dtos.TeamStatisticsDTO;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class TeamScrapingService extends WebScrapingService {
@@ -209,4 +209,47 @@ public class TeamScrapingService extends WebScrapingService {
         }
     }
 
+    public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
+        WebDriver driver = null;
+        String url = BASE_URL + "/teams/" + teamId;
+        driver = setupDriverAndNavigate(url);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
+
+        WebElement countryNameContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("#breadcrumb-nav span.iconize.iconize-icon-left")
+        ));
+        String teamName = countryNameContainer.getText().trim();
+
+        WebElement tableBody   = driver.findElement(By.id("top-team-stats-summary-content"));
+        WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
+        List<WebElement> cells = summaryRow.findElements(By.tagName("td"));
+
+        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName("strong")).getText();
+        String totalGoalsStr          = cells.get(2).findElement(By.tagName("strong")).getText();
+        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName("strong")).getText();
+        String avgPossessionStr       = cells.get(5).findElement(By.tagName("strong")).getText();
+        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName("strong")).getText();
+        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName("strong")).getText();
+        String overallRatingStr       = cells.get(8).findElement(By.tagName("strong")).getText();
+
+        WebElement cardCell        = cells.get(4);
+        String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();
+        String totalRedCardsStr    = cardCell.findElement(By.xpath(".//span[@class='red-card-box']/strong")).getText();
+
+        TeamStatisticsDTO teamStatisticsDTO =   TeamStatisticsDTO.builder()
+                                                .name(teamName)
+                                                .totalMatchesPlayedStr(totalMatchesPlayedStr)
+                                                .avgShotsPerGameStr(avgShotsPerGameStr)
+                                                .totalGoalsStr(totalGoalsStr)
+                                                .avgPassSuccessStr(avgPassSuccessStr)
+                                                .avgPossessionStr(avgPossessionStr)
+                                                .avgAerialWonPerGameStr(avgAerialWonPerGameStr)
+                                                .overallRatingStr(overallRatingStr)
+                                                .totalYellowCardsStr(totalYellowCardsStr)
+                                                .totalRedCardsStr(totalRedCardsStr)
+                                                .build();
+        return teamStatisticsDTO;
+    }
 }

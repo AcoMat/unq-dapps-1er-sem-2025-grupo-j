@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.model.dtos.ComparisonDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
@@ -99,10 +100,12 @@ public class TeamController {
         @ApiResponse(responseCode = "400", description = "Invalid team IDs"),
         @ApiResponse(responseCode = "404", description = "One or both teams not found")
     })
-    public ResponseEntity<Object> getTeamComparison(
-            @Parameter(description = "ID of the first team to compare", example = "1") @RequestParam String team1Id,
-            @Parameter(description = "ID of the second team to compare", example = "2") @RequestParam String team2Id) {
-        return ResponseEntity.ok(null);
+    public ResponseEntity<ComparisonDto> getTeamComparison(
+            @Parameter(description = "ID of the first team to compare", example = "1") @RequestParam String teamIdA,
+            @Parameter(description = "ID of the second team to compare", example = "2") @RequestParam String teamIdB) {
+
+        ComparisonDto comparisonDto = this.teamService.getTeamsComparison(teamIdA,teamIdB);
+        return ResponseEntity.status(HttpStatus.OK).body(comparisonDto);
     }
 
     @GetMapping("/{teamId}")
