@@ -8,13 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.UnknownContentTypeException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
-import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
+import unq.dapp.grupoj.soccergenius.model.dtos.*;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 
 import java.util.List;
@@ -111,6 +108,18 @@ public class TeamServiceImpl implements TeamService {
             logger.error("Error fetching upcoming matches for team {}: {}", teamName, e.getMessage(), e);
             return List.of();
         }
+    }
+
+    @Override
+    public ComparisonDto getTeamsComparison(String teamIdA, String teamIdB) {
+        TeamStatisticsDTO teamA = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA));
+        TeamStatisticsDTO teamB = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB));
+
+        ComparisonDto comparisonDto = ComparisonDto.builder()
+                                        .teamB(teamB)
+                                        .teamA(teamA)
+                                        .build();
+        return comparisonDto;
     }
 
     @Override
