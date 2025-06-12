@@ -47,20 +47,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid body format");
     }
 
-    @ExceptionHandler(AlreadyUsedEmail.class)
-    public ResponseEntity<String> handleGenericRuntime(AlreadyUsedEmail ex) {
-        logger.warn("Registration attempt with already used email: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    }
-
     @ExceptionHandler(TokenVerificationException.class)
     public ResponseEntity<String> handleGenericRuntime(TokenVerificationException ex) {
         logger.error("Token verification exception: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<String> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 
@@ -71,29 +60,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
-    @ExceptionHandler(WrongCredentialsException.class)
-    public ResponseEntity<String> handleWrongCredentials(WrongCredentialsException ex) {
-        logger.error("Wrong credentials exception: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-    }
-
-
     @ExceptionHandler(ScrappingException.class)
     public ResponseEntity<String> handleScrappingException(ScrappingException ex) {
         logger.error("Scraping exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGenericException(Exception ex) {
-        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NoResourceFoundException ex) {
-        logger.error("Resource not found: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This endpoint does not exist, verify the URL");
     }
 
     @ExceptionHandler(TeamNotFoundException.class)
@@ -108,4 +78,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyMap());
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NoResourceFoundException ex) {
+        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This endpoint does not exist, verify the URL");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+    }
 }
