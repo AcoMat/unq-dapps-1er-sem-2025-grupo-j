@@ -20,14 +20,31 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/audit.log</file> <!-- Audit log file -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/auditArchived/audit.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
     <!-- Root logger level -->
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
 
+    <logger name="unq.dapp.grupoj.soccergenius.aspect.AuditWebService" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_FILE" />
+    </logger>
+
     <!-- Application specific loggers -->
     <logger name="unq.dapp.grupoj.soccergenius" level="DEBUG" />
+
 
     <!-- Third-party library loggers -->
     <logger name="org.springframework" level="INFO" />
