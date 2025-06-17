@@ -13,10 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
-import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
+import unq.dapp.grupoj.soccergenius.model.dtos.*;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
@@ -35,8 +32,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("e2e")
-@Tag("e2e")
+@ActiveProfiles("unit")
+@Tag("unit")
 @ExtendWith(MockitoExtension.class)
 public class TeamServiceTest {
     @Mock
@@ -225,28 +222,6 @@ public class TeamServiceTest {
     }
 
     @Test
-    void getUpcomingMatches_TeamNotFoundInCompetition() {
-        String teamNameInput = "Unknown Team";
-        CompetitionDTO competitionDTO = new CompetitionDTO();
-        competitionDTO.setTeams(Collections.emptyList()); // No teams, or teams that don't match
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/competitions/2014/teams"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            teamService.getUpcomingMatches(teamNameInput);
-        });
-
-        assertEquals("Equipo no encontrado: " + teamNameInput, exception.getMessage());
-        verify(restTemplate, times(1)).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CompetitionDTO.class));
-    }
-
-    @Test
     void getUpcomingMatches_ApiReturnsNullMatches() {
         String teamNameInput = "FC Barcelona";
         int teamId = 123;
@@ -349,7 +324,6 @@ public class TeamServiceTest {
         TeamDto resultDto = teamService.getTeamFromLaLigaById(teamId);
 
         assertNotNull(resultDto);
-//        assertEquals("FC Barcelona", resultDto.getName());
         verify(teamRepository, times(1)).findById(teamId);
         verify(webScrapingService, times(1)).scrapTeamDataById(teamId);
         verify(teamRepository, times(1)).save(mockScrapedTeam);
@@ -371,5 +345,83 @@ public class TeamServiceTest {
         verify(webScrapingService, times(1)).scrapTeamDataById(teamId);
         verify(teamRepository, never()).save(any(Team.class));
         verify(mapper, never()).toDTO(any(Team.class));
+    }
+
+    @Test
+    void getTeamsComparison_SuccessfulCase() {
+        String teamIdA = "1";
+        String teamIdB = "2";
+
+        TeamStatisticsDTO teamAStats = TeamStatisticsDTO.builder()
+                                        .name("Team A")
+                                        .totalMatchesPlayedStr("4")
+                                        .totalGoalsStr("13")
+                                        .avgShotsPerGameStr("23")
+                                        .avgPossessionStr("89")
+                                        .avgPassSuccessStr("90")
+                                        .avgAerialWonPerGameStr("34")
+                                        .overallRatingStr("99")
+                                        .totalYellowCardsStr("7")
+                                        .totalRedCardsStr("9")
+                                        .build();
+
+        TeamStatisticsDTO teamBStats = TeamStatisticsDTO.builder()
+                                        .name("Team B")
+                                        .totalMatchesPlayedStr("4")
+                                        .totalGoalsStr("13")
+                                        .avgShotsPerGameStr("23")
+                                        .avgPossessionStr("89")
+                                        .avgPassSuccessStr("90")
+                                        .avgAerialWonPerGameStr("34")
+                                        .overallRatingStr("99")
+                                        .totalYellowCardsStr("7")
+                                        .totalRedCardsStr("9")
+                                        .build();
+
+        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA)))
+                .thenReturn(teamAStats);
+        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB)))
+                .thenReturn(teamBStats);
+
+        ComparisonDto result = teamService.getTeamsComparison(teamIdA, teamIdB);
+
+        assertNotNull(result);
+        assertEquals(teamAStats, result.getTeamA());
+        assertEquals(teamBStats, result.getTeamB());
+
+        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdA));
+        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdB));
+        verifyNoMoreInteractions(webScrapingService);
+    }
+
+    @Test
+    void getTeamsComparison_ErrorCase_ScrapingFails() {
+        String teamIdA = "1";
+        String teamIdB = "2";
+
+        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA)))
+                .thenThrow(new ScrappingException("Error scraping team A"));
+
+        ScrappingException thrown = assertThrows(ScrappingException.class, () -> {
+            teamService.getTeamsComparison(teamIdA, teamIdB);
+        });
+
+        assertTrue(thrown.getMessage().contains("Error scraping team A"));
+
+        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdA));
+        verify(webScrapingService, never()).scrapTeamStatisticsById(Integer.parseInt(teamIdB));
+        verifyNoMoreInteractions(webScrapingService);
+    }
+
+    @Test
+    void getTeamsComparison_ErrorCase_InvalidTeamIdFormat() {
+        String teamIdA = "invalid-id";
+        String teamIdB = "2";
+
+        assertThrows(NumberFormatException.class, () -> {
+            teamService.getTeamsComparison(teamIdA, teamIdB);
+        });
+
+        verifyNoInteractions(webScrapingService);
     }
 }

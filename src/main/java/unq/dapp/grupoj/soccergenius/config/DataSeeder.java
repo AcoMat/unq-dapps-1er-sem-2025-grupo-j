@@ -14,6 +14,9 @@ import unq.dapp.grupoj.soccergenius.services.auth.AuthService;
 import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Component
 public class DataSeeder implements CommandLineRunner {
 
@@ -44,7 +47,7 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         logger.info("Seeding data...");
 
         if(usersRepository.existsByEmail("john.doe@mail.com")) {
@@ -53,69 +56,12 @@ public class DataSeeder implements CommandLineRunner {
             RegisterFormDTO registerFormDTO = new RegisterFormDTO("John", "Doe", "john.doe@mail.com", "password123");
             authService.register(registerFormDTO);
         }
-
-        if(teamRepository.existsById(63)) {
-            logger.info("Team already exists, skipping registration.");
-        } else {
-            if(!teamRepository.existsById(51)) {
-                teamService.getTeamFromLaLigaById(51);
-            }
-            if(!teamRepository.existsById(52)) {
-                teamService.getTeamFromLaLigaById(52);
-            }
-            if(!teamRepository.existsById(53)) {
-                teamService.getTeamFromLaLigaById(53);
-            }
-            if(!teamRepository.existsById(54)) {
-                teamService.getTeamFromLaLigaById(54);
-            }
-            if(!teamRepository.existsById(55)) {
-                teamService.getTeamFromLaLigaById(55);
-            }
-            if(!teamRepository.existsById(58)) {
-                teamService.getTeamFromLaLigaById(58);
-            }
-            if(!teamRepository.existsById(60)) {
-                teamService.getTeamFromLaLigaById(60);
-            }
-            if(!teamRepository.existsById(62)) {
-                teamService.getTeamFromLaLigaById(62);
-            }
-            if(!teamRepository.existsById(63)) {
-                teamService.getTeamFromLaLigaById(63);
-            }
-            if(!teamRepository.existsById(65)) {
-                teamService.getTeamFromLaLigaById(65);
-            }
-            if(!teamRepository.existsById(64)) {
-                teamService.getTeamFromLaLigaById(64);
-            }
-            if(!teamRepository.existsById(67)) {
-                teamService.getTeamFromLaLigaById(67);
-            }
-            if(!teamRepository.existsById(68)) {
-                teamService.getTeamFromLaLigaById(68);
-            }
-            if(!teamRepository.existsById(70)) {
-                teamService.getTeamFromLaLigaById(70);
-            }
-            if(!teamRepository.existsById(131)) {
-                teamService.getTeamFromLaLigaById(131);
-            }
-            if(!teamRepository.existsById(839)) {
-                teamService.getTeamFromLaLigaById(839);
-            }
-            if(!teamRepository.existsById(819)) {
-                teamService.getTeamFromLaLigaById(819);
-            }
-            if(!teamRepository.existsById(825)) {
-                teamService.getTeamFromLaLigaById(825);
-            }
-            if(!teamRepository.existsById(838)) {
-                teamService.getTeamFromLaLigaById(838);
-            }
-            if(!teamRepository.existsById(2783)) {
-                teamService.getTeamFromLaLigaById(2783);
+        List<Integer> teamIds = Arrays.asList(63,51,52,53,54,55,58,60,62,63,65,64,67,68,70,131,839,819,825,838,2783);
+        for (Integer teamId : teamIds) {
+            if (!teamRepository.existsById(teamId)) {
+                teamService.getTeamFromLaLigaById(teamId);
+            } else {
+                logger.info("Team with ID {} already exists, skipping registration.", teamId);
             }
         }
 

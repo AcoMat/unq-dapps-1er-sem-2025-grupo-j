@@ -1,18 +1,17 @@
 package unq.dapp.grupoj.soccergenius.services.team;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.UnknownContentTypeException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
-import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
+import unq.dapp.grupoj.soccergenius.model.dtos.*;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-import unq.dapp.grupoj.soccergenius.model.dtos.CompetitionDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.FootballApiResponseDTO;
-import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 
 import java.util.List;
@@ -53,7 +52,10 @@ public class TeamServiceImpl implements TeamService {
             List<String> players = this.webScrapingService.getPlayersIdsFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
-        } catch (Exception e) {
+        }catch (NoSuchElementException e){
+            return List.of();
+        }
+        catch (Exception e) {
             throw new ScrappingException(e.getMessage());
         }
     }
@@ -69,23 +71,22 @@ public class TeamServiceImpl implements TeamService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<CompetitionDTO> competitionDTOResponseEntity = restTemplate.exchange(apiUrlGetTeams, HttpMethod.GET,entity, CompetitionDTO.class);
-
-        List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
-
-        int idTeam = competitionTeams.stream()
-                .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
-                .findFirst()
-                .map(Team::getId)
-                .orElseThrow(()->new RuntimeException("Equipo no encontrado: " + teamName));
-
-        String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id",String.valueOf(idTeam));
-
-        ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam,HttpMethod.GET,entity,FootballApiResponseDTO.class);
-
-        FootballApiResponseDTO apiResponse = response.getBody();
-
         try {
+            ResponseEntity<CompetitionDTO> competitionDTOResponseEntity = restTemplate.exchange(apiUrlGetTeams, HttpMethod.GET, entity, CompetitionDTO.class);
+            List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
+
+            int idTeam = competitionTeams.stream()
+                    .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
+                    .findFirst()
+                    .map(Team::getId)
+                    .orElseThrow(() -> new RuntimeException("Equipo no encontrado: " + teamName));
+
+            String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED" .replace("id", String.valueOf(idTeam));
+
+            ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam, HttpMethod.GET, entity, FootballApiResponseDTO.class);
+
+            FootballApiResponseDTO apiResponse = response.getBody();
+
             if (apiResponse != null && apiResponse.getMatches() != null) {
                 List<MatchDTO> upcomingMatches = apiResponse.getMatches().stream()
                         .map(matchDto -> {
@@ -107,6 +108,18 @@ public class TeamServiceImpl implements TeamService {
             logger.error("Error fetching upcoming matches for team {}: {}", teamName, e.getMessage(), e);
             return List.of();
         }
+    }
+
+    @Override
+    public ComparisonDto getTeamsComparison(String teamIdA, String teamIdB) {
+        TeamStatisticsDTO teamA = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA));
+        TeamStatisticsDTO teamB = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB));
+
+        ComparisonDto comparisonDto = ComparisonDto.builder()
+                                        .teamB(teamB)
+                                        .teamA(teamA)
+                                        .build();
+        return comparisonDto;
     }
 
     @Override
