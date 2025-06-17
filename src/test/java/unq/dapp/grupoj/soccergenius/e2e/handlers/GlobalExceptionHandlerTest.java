@@ -118,7 +118,7 @@ class GlobalExceptionHandlerTest {
     void testProtectedEndpointWithoutToken() throws Exception {
         mockMvc.perform(get("/players/performance/303655"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string(containsString("Missing authentication token")));
+                .andExpect(content().string(containsString("Invalid or missing authentication token")));
     }
 
 
