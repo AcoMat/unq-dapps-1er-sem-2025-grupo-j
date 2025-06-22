@@ -128,7 +128,8 @@ public class TeamScrapingService extends WebScrapingService {
     }
 
     public double getCurrentRankingOfTeam(int teamId) {
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         WebDriver driver = null;
         try{
             driver = setupDriverAndNavigate(url);
@@ -166,7 +167,8 @@ public class TeamScrapingService extends WebScrapingService {
         String leagueName;
         String countryName;
 
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         try {
             driver = setupDriverAndNavigate(url);
 
@@ -211,7 +213,8 @@ public class TeamScrapingService extends WebScrapingService {
 
     public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
         WebDriver driver = null;
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         driver = setupDriverAndNavigate(url);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
