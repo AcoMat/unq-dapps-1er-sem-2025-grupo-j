@@ -88,11 +88,12 @@ public class TeamServiceImpl implements TeamService {
             FootballApiResponseDTO apiResponse = response.getBody();
 
             if (apiResponse != null && apiResponse.getMatches() != null) {
+                final String unknown = "Unknown";
                 List<MatchDTO> upcomingMatches = apiResponse.getMatches().stream()
                         .map(matchDto -> {
-                            String homeTeamName = matchDto.getLocalTeam() != null ? matchDto.getLocalTeam() : "Unknown";
-                            String awayTeamName = matchDto.getVisitorTeam() != null ? matchDto.getVisitorTeam() : "Unknown";
-                            String competition = matchDto.getCompetition() != null ? matchDto.getCompetition() : "Unknown";
+                            String homeTeamName = matchDto.getLocalTeam() != null ? matchDto.getLocalTeam() : unknown;
+                            String awayTeamName = matchDto.getVisitorTeam() != null ? matchDto.getVisitorTeam() : unknown;
+                            String competition = matchDto.getCompetition() != null ? matchDto.getCompetition() : unknown;
 
                             return new MatchDTO(homeTeamName, awayTeamName, competition, matchDto.getUtcDate());
                         })

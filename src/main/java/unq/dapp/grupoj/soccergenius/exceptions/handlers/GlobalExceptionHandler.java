@@ -19,11 +19,12 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String ResourceNotFoundMsg = "Resource not found: {}";
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ConfigDataResourceNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFound(ConfigDataResourceNotFoundException ex) {
-        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        logger.error(ResourceNotFoundMsg, ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
@@ -68,19 +69,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TeamNotFoundException.class)
     public ResponseEntity<String> handleTeamNotFoundException(TeamNotFoundException ex) {
-        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        logger.error(ResourceNotFoundMsg, ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(PlayerNotFoundException.class)
     public ResponseEntity<Map<String,String>> handlePlayerNotFoundException(PlayerNotFoundException ex) {
-        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        logger.error(ResourceNotFoundMsg, ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyMap());
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<String> handleNotFoundException(NoResourceFoundException ex) {
-        logger.error("Resource not found: {}", ex.getMessage(), ex);
+        logger.error(ResourceNotFoundMsg, ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This endpoint does not exist, verify the URL");
     }
 

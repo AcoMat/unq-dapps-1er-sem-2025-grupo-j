@@ -11,15 +11,4 @@ public class CurrentParticipation {
     @ManyToOne
     @JoinColumn(name = "player_id")
     private HistoricalParticipationsSummary playerHistory;
-
-    private String championshipName;
-
-    //private int totalGamesPlayed;
-    //private int totalMinsPLayed;
-    //private int totalGoals;
-    //private int totalAssists;
-    //private int totalYellowCards;
-    //private int totalRedCards;
-
-    private int rating;
 }

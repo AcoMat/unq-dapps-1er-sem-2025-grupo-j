@@ -128,7 +128,8 @@ public class TeamScrapingService extends WebScrapingService {
     }
 
     public double getCurrentRankingOfTeam(int teamId) {
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         WebDriver driver = null;
         try{
             driver = setupDriverAndNavigate(url);
@@ -166,7 +167,8 @@ public class TeamScrapingService extends WebScrapingService {
         String leagueName;
         String countryName;
 
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         try {
             driver = setupDriverAndNavigate(url);
 
@@ -211,7 +213,8 @@ public class TeamScrapingService extends WebScrapingService {
 
     public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
         WebDriver driver = null;
-        String url = BASE_URL + "/teams/" + teamId;
+        final String BASE_URL = "https://es.whoscored.com/teams/";
+        String url = BASE_URL + teamId;
         driver = setupDriverAndNavigate(url);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
@@ -226,13 +229,15 @@ public class TeamScrapingService extends WebScrapingService {
         WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
         List<WebElement> cells = summaryRow.findElements(By.tagName("td"));
 
-        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName("strong")).getText();
-        String totalGoalsStr          = cells.get(2).findElement(By.tagName("strong")).getText();
-        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName("strong")).getText();
-        String avgPossessionStr       = cells.get(5).findElement(By.tagName("strong")).getText();
-        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName("strong")).getText();
-        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName("strong")).getText();
-        String overallRatingStr       = cells.get(8).findElement(By.tagName("strong")).getText();
+        final String tagNameStrong = "strong";
+
+        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName(tagNameStrong)).getText();
+        String totalGoalsStr          = cells.get(2).findElement(By.tagName(tagNameStrong)).getText();
+        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName(tagNameStrong)).getText();
+        String avgPossessionStr       = cells.get(5).findElement(By.tagName(tagNameStrong)).getText();
+        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName(tagNameStrong)).getText();
+        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName(tagNameStrong)).getText();
+        String overallRatingStr       = cells.get(8).findElement(By.tagName(tagNameStrong)).getText();
 
         WebElement cardCell        = cells.get(4);
         String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();

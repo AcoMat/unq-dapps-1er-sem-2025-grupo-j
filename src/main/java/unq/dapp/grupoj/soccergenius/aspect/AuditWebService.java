@@ -55,7 +55,7 @@ public class AuditWebService {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();
-            if (request != null && request.getUserPrincipal() != null) {
+            if (request.getUserPrincipal() != null) {
                 return request.getUserPrincipal().getName();
             }
         }
