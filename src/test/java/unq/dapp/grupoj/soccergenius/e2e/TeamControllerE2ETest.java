@@ -2,7 +2,6 @@ package unq.dapp.grupoj.soccergenius.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
-// Assuming these DTOs are used by your controller. Adjust if necessary.
-// import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
-// import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
-// The ScrappingException might be relevant if your controller handles it.
-// import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
-
-import java.util.List; // For jsonPath type checking
-
+import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
