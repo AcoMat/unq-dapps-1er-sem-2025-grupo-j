@@ -18,14 +18,6 @@ public abstract class Summary {
     @JsonBackReference
     private Player player;
 
-    //SUMMARY
-    //private double totalGamesPlayed;
-    //private double totalMinsPLayed;
-    //private double totalGoals;
-    //private double totalAssists;
-    //private double totalYellowCards;
-    //private double totalRedCards;
-
     private double rating;
 
     protected Summary() {
