@@ -226,13 +226,15 @@ public class TeamScrapingService extends WebScrapingService {
         WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
         List<WebElement> cells = summaryRow.findElements(By.tagName("td"));
 
-        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName("strong")).getText();
-        String totalGoalsStr          = cells.get(2).findElement(By.tagName("strong")).getText();
-        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName("strong")).getText();
-        String avgPossessionStr       = cells.get(5).findElement(By.tagName("strong")).getText();
-        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName("strong")).getText();
-        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName("strong")).getText();
-        String overallRatingStr       = cells.get(8).findElement(By.tagName("strong")).getText();
+        final String tagNameStrong = "strong";
+
+        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName(tagNameStrong)).getText();
+        String totalGoalsStr          = cells.get(2).findElement(By.tagName(tagNameStrong)).getText();
+        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName(tagNameStrong)).getText();
+        String avgPossessionStr       = cells.get(5).findElement(By.tagName(tagNameStrong)).getText();
+        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName(tagNameStrong)).getText();
+        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName(tagNameStrong)).getText();
+        String overallRatingStr       = cells.get(8).findElement(By.tagName(tagNameStrong)).getText();
 
         WebElement cardCell        = cells.get(4);
         String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();
