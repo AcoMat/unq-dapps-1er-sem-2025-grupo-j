@@ -168,7 +168,7 @@ public class TeamScrapingService extends WebScrapingService {
         String leagueName;
         String countryName;
 
-        String url = BASE_URL_TEAMS + teamId;
+            String url = BASE_URL_TEAMS + teamId;
         try {
             driver = setupDriverAndNavigate(url);
 
