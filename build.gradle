@@ -171,6 +171,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.4")
 	testImplementation 'io.rest-assured:spring-mock-mvc:3.0.0'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
 
 	//logging
 	implementation("org.springframework.boot:spring-boot-starter-logging")
