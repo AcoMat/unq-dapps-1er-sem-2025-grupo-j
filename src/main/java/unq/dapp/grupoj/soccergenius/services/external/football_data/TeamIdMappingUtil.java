@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TeamIdMappingUtil {
-    /**
-     * Retorna el mapeo entre IDs de WhoScored y Football-data.org
-     * @return Un mapa con el ID de WhoScored como clave y el ID de Football-data.org como valor
-     */
+
+    private TeamIdMappingUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static Map<Integer, Integer> getWhoScoredToFootballDataTeamIdMap() {
         Map<Integer, Integer> mapping = new HashMap<>();
         mapping.put(51, 89);  // Mallorca
