@@ -6,9 +6,6 @@ import unq.dapp.grupoj.soccergenius.model.player.Player;
 @Entity
 public class CurrentParticipationsSummary extends Summary {
 
-    //@OneToMany(mappedBy = "player")
-    //private List<ChampionshipParticipation> participations;
-
     public CurrentParticipationsSummary() {
         super();
     }
