@@ -1,6 +1,5 @@
 package unq.dapp.grupoj.soccergenius.exceptions.handlers;
 
-import org.apache.hc.client5.http.auth.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import unq.dapp.grupoj.soccergenius.exceptions.*;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
