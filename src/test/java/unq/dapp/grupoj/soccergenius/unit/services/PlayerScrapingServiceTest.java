@@ -58,13 +58,13 @@ public class PlayerScrapingServiceTest {
     @Mock
     private WebElement mockRatingCellElement;
 
-    private final int PLAYER_ID = 123;
-    private final String PLAYER_NAME = "Test Player";
-    private final int PLAYER_AGE = 30;
-    private final String PLAYER_NATIONALITY = "Testlandia";
-    private final String PLAYER_HEIGHT = "180cm";
-    private final List<String> PLAYER_POSITIONS = Arrays.asList("Forward", "Midfielder");
-    private final double PLAYER_RATING = 8.5;
+    private final int playerId = 123;
+    private final String playerName = "Test Player";
+    private final int playerAge = 30;
+    private final String playerNationality = "Testlandia";
+    private final String playerHeight = "180cm";
+    private final List<String> playerPositions = Arrays.asList("Forward", "Midfielder");
+    private final double playerRating = 8.5;
 
     @BeforeEach
     void setUp() {
@@ -82,38 +82,38 @@ public class PlayerScrapingServiceTest {
                 .thenReturn(Collections.emptyList()); // La página existe
 
         when(mockDriver.findElement(By.xpath("//span[contains(text(),'Nombre: ')]/parent::div"))).thenReturn(mockNameContainerElement);
-        when(mockNameContainerElement.getText()).thenReturn("Nombre: " + PLAYER_NAME + " ");
+        when(mockNameContainerElement.getText()).thenReturn("Nombre: " + playerName + " ");
 
         when(mockDriver.findElement(By.xpath("//span[contains(text(),'Edad: ')]/parent::div"))).thenReturn(mockAgeElement);
-        when(mockAgeElement.getText()).thenReturn("Edad: " + PLAYER_AGE + " aos");
+        when(mockAgeElement.getText()).thenReturn("Edad: " + playerAge + " aos");
 
         when(mockDriver.findElement(By.xpath("//span[contains(text(),'Nacionalidad:')]/parent::div"))).thenReturn(mockNationalityElement);
         when(mockNationalityElement.findElement(By.className("iconize-icon-left"))).thenReturn(mockCountryElement);
-        when(mockCountryElement.getText()).thenReturn(PLAYER_NATIONALITY + " FlagText");
+        when(mockCountryElement.getText()).thenReturn(playerNationality + " FlagText");
 
         when(mockDriver.findElement(By.xpath("//span[contains(text(),'Posiciones: ')]/parent::div"))).thenReturn(mockPositionsDivElement);
         WebElement mockPositionSpan1 = mock(WebElement.class);
         WebElement mockPositionSpan2 = mock(WebElement.class);
-        when(mockPositionSpan1.getText()).thenReturn(PLAYER_POSITIONS.get(0) + " ");
-        when(mockPositionSpan2.getText()).thenReturn(" " + PLAYER_POSITIONS.get(1));
+        when(mockPositionSpan1.getText()).thenReturn(playerPositions.get(0) + " ");
+        when(mockPositionSpan2.getText()).thenReturn(" " + playerPositions.get(1));
         when(mockPositionsDivElement.findElements(By.xpath(".//span[@style='display: inline-block;']")))
                 .thenReturn(Arrays.asList(mockPositionSpan1, mockPositionSpan2));
 
         when(mockDriver.findElement(By.xpath("//span[contains(text(),'Altura:')]/parent::div"))).thenReturn(mockHeightElement);
-        when(mockHeightElement.getText()).thenReturn("Altura:" + PLAYER_HEIGHT + " ");
+        when(mockHeightElement.getText()).thenReturn("Altura:" + playerHeight + " ");
 
         // Act
-        Player result = playerScrapingService.scrapPlayerData(PLAYER_ID);
+        Player result = playerScrapingService.scrapPlayerData(playerId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(PLAYER_ID, result.getId());
-        assertEquals(PLAYER_NAME, result.getName());
-        assertEquals(PLAYER_AGE, result.getAge());
-        assertEquals(PLAYER_NATIONALITY, result.getNationality());
-        assertEquals(PLAYER_HEIGHT, result.getHeight());
-        assertEquals(PLAYER_POSITIONS.size(), result.getPositions().size());
-        assertTrue(result.getPositions().containsAll(PLAYER_POSITIONS));
+        assertEquals(playerId, result.getId());
+        assertEquals(playerName, result.getName());
+        assertEquals(playerAge, result.getAge());
+        assertEquals(playerNationality, result.getNationality());
+        assertEquals(playerHeight, result.getHeight());
+        assertEquals(playerPositions.size(), result.getPositions().size());
+        assertTrue(result.getPositions().containsAll(playerPositions));
 
         verify(mockDriver).quit();
     }
@@ -126,7 +126,7 @@ public class PlayerScrapingServiceTest {
                 .thenReturn(Collections.singletonList(mockErrorMessage)); // La página NO existe
 
         // Act
-        Player result = playerScrapingService.scrapPlayerData(PLAYER_ID);
+        Player result = playerScrapingService.scrapPlayerData(playerId);
 
         // Assert
         assertNull(result);
@@ -141,7 +141,7 @@ public class PlayerScrapingServiceTest {
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                playerScrapingService.scrapPlayerData(PLAYER_ID)
+                playerScrapingService.scrapPlayerData(playerId)
         );
         assertTrue(exception.getMessage().contains("Error scraping player data"));
         verify(mockDriver, never()).quit(); // El driver no se inicializó con éxito
@@ -157,7 +157,7 @@ public class PlayerScrapingServiceTest {
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                playerScrapingService.scrapPlayerData(PLAYER_ID)
+                playerScrapingService.scrapPlayerData(playerId)
         );
         assertTrue(exception.getMessage().contains("Error scraping player data"));
         verify(mockDriver).quit(); // El driver se inicializó, así que quit() debería llamarse
@@ -167,13 +167,13 @@ public class PlayerScrapingServiceTest {
     @Test
     void getCurrentParticipationInfo_shouldReturnSummary_whenDataIsValid() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
 
         // Mock para WebDriverWait y extractRatingFromPage
         when(mockDriver.findElement(By.id("top-player-stats-summary-grid"))).thenReturn(mockGridPresenceElement); // Para WebDriverWait
         when(mockDriver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"))).thenReturn(mockTotalRowElement);
         when(mockTotalRowElement.findElement(By.xpath("./td[@class='rating']/strong"))).thenReturn(mockRatingCellElement);
-        when(mockRatingCellElement.getText()).thenReturn(String.valueOf(PLAYER_RATING));
+        when(mockRatingCellElement.getText()).thenReturn(String.valueOf(playerRating));
 
         // Act
         CurrentParticipationsSummary summary = playerScrapingService.getCurrentParticipationInfo(testPlayer);
@@ -181,14 +181,14 @@ public class PlayerScrapingServiceTest {
         // Assert
         assertNotNull(summary);
         assertEquals(testPlayer, summary.getPlayer());
-        assertEquals(PLAYER_RATING, summary.getRating());
+        assertEquals(playerRating, summary.getRating());
         verify(mockDriver).quit();
     }
 
     @Test
     void getCurrentParticipationInfo_shouldThrowScrappingException_whenSeleniumErrorOccursDuringSetup() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
         doThrow(new RuntimeException("Selenium connection failed"))
                 .when(playerScrapingService).setupDriverAndNavigate(anyString());
 
@@ -203,7 +203,7 @@ public class PlayerScrapingServiceTest {
     @Test
     void getCurrentParticipationInfo_shouldThrowScrappingException_whenRatingExtractionFails() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
         when(mockDriver.findElement(By.id("top-player-stats-summary-grid"))).thenReturn(mockGridPresenceElement); // Para WebDriverWait
         when(mockDriver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]")))
                 .thenThrow(new NoSuchElementException("Cannot find total row"));
@@ -220,13 +220,13 @@ public class PlayerScrapingServiceTest {
     @Test
     void getHistoryInfo_shouldReturnSummary_whenDataIsValid() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
 
         // Mock para WebDriverWait y extractRatingFromPage
         when(mockDriver.findElement(By.id("top-player-stats-summary-grid"))).thenReturn(mockGridPresenceElement); // Para WebDriverWait
         when(mockDriver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]"))).thenReturn(mockTotalRowElement);
         when(mockTotalRowElement.findElement(By.xpath("./td[@class='rating']/strong"))).thenReturn(mockRatingCellElement);
-        when(mockRatingCellElement.getText()).thenReturn(String.valueOf(PLAYER_RATING));
+        when(mockRatingCellElement.getText()).thenReturn(String.valueOf(playerRating));
 
         // Act
         HistoricalParticipationsSummary summary = playerScrapingService.getHistoryInfo(testPlayer);
@@ -234,14 +234,14 @@ public class PlayerScrapingServiceTest {
         // Assert
         assertNotNull(summary);
         assertEquals(testPlayer, summary.getPlayer());
-        assertEquals(PLAYER_RATING, summary.getRating());
+        assertEquals(playerRating, summary.getRating());
         verify(mockDriver).quit();
     }
 
     @Test
     void getHistoryInfo_shouldThrowScrappingException_whenSeleniumErrorOccursDuringSetup() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
         doThrow(new RuntimeException("Selenium connection failed"))
                 .when(playerScrapingService).setupDriverAndNavigate(anyString());
 
@@ -256,7 +256,7 @@ public class PlayerScrapingServiceTest {
     @Test
     void getHistoryInfo_shouldThrowScrappingException_whenRatingExtractionFails() {
         // Arrange
-        Player testPlayer = new Player(PLAYER_ID, PLAYER_NAME, PLAYER_AGE, PLAYER_NATIONALITY, PLAYER_HEIGHT, PLAYER_POSITIONS);
+        Player testPlayer = new Player(playerId, playerName, playerAge, playerNationality, playerHeight, playerPositions);
         when(mockDriver.findElement(By.id("top-player-stats-summary-grid"))).thenReturn(mockGridPresenceElement); // Para WebDriverWait
         when(mockDriver.findElement(By.xpath("//table[@id='top-player-stats-summary-grid']/tbody/tr[last()]")))
                 .thenThrow(new NoSuchElementException("Cannot find total row for history"));

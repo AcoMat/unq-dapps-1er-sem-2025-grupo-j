@@ -49,9 +49,9 @@ public class MatchScrapingServiceTest {
     @Spy
     private MatchScrapingService matchScrapingService = new MatchScrapingService();
 
-    private final String TEAM_A = "Team A";
-    private final String TEAM_B = "Team B";
-    private final String EXPECTED_MATCH_URL = "http://example.com/match/123";
+    private final String teamA = "Team A";
+    private final String teamB = "Team B";
+    private final String expectedMatchUrl = "http://example.com/match/123";
 
     @BeforeEach
     void setUp() {
@@ -68,17 +68,17 @@ public class MatchScrapingServiceTest {
                 .thenReturn(Collections.singletonList(mockMatchElement));
         when(mockMatchElement.findElements(By.className("Match-module_teamNameText__Dqv-G")))
                 .thenReturn(Arrays.asList(mockTeamNameElement1, mockTeamNameElement2));
-        when(mockTeamNameElement1.getText()).thenReturn(TEAM_A);
-        when(mockTeamNameElement2.getText()).thenReturn(TEAM_B);
+        when(mockTeamNameElement1.getText()).thenReturn(teamA);
+        when(mockTeamNameElement2.getText()).thenReturn(teamB);
         when(mockMatchElement.findElement(By.className("Match-module_score__5Ghhj")))
                 .thenReturn(mockScoreLinkElement);
-        when(mockScoreLinkElement.getAttribute("href")).thenReturn(EXPECTED_MATCH_URL);
+        when(mockScoreLinkElement.getAttribute("href")).thenReturn(expectedMatchUrl);
 
         // Act
-        String matchUrl = matchScrapingService.findMatchLink(TEAM_A, TEAM_B);
+        String matchUrl = matchScrapingService.findMatchLink(teamA, teamB);
 
         // Assert
-        assertEquals(EXPECTED_MATCH_URL, matchUrl);
+        assertEquals(expectedMatchUrl, matchUrl);
         verify(mockDriver).quit();
     }
 
@@ -89,17 +89,17 @@ public class MatchScrapingServiceTest {
                 .thenReturn(Collections.singletonList(mockMatchElement));
         when(mockMatchElement.findElements(By.className("Match-module_teamNameText__Dqv-G")))
                 .thenReturn(Arrays.asList(mockTeamNameElement1, mockTeamNameElement2));
-        when(mockTeamNameElement1.getText()).thenReturn(TEAM_B); // Reversed order
-        when(mockTeamNameElement2.getText()).thenReturn(TEAM_A);
+        when(mockTeamNameElement1.getText()).thenReturn(teamB); // Reversed order
+        when(mockTeamNameElement2.getText()).thenReturn(teamA);
         when(mockMatchElement.findElement(By.className("Match-module_score__5Ghhj")))
                 .thenReturn(mockScoreLinkElement);
-        when(mockScoreLinkElement.getAttribute("href")).thenReturn(EXPECTED_MATCH_URL);
+        when(mockScoreLinkElement.getAttribute("href")).thenReturn(expectedMatchUrl);
 
         // Act
-        String matchUrl = matchScrapingService.findMatchLink(TEAM_A, TEAM_B);
+        String matchUrl = matchScrapingService.findMatchLink(teamA, teamB);
 
         // Assert
-        assertEquals(EXPECTED_MATCH_URL, matchUrl);
+        assertEquals(expectedMatchUrl, matchUrl);
         verify(mockDriver).quit();
     }
 
@@ -114,7 +114,7 @@ public class MatchScrapingServiceTest {
         when(mockTeamNameElement2.getText()).thenReturn("Other Team 2");
 
         // Act
-        String matchUrl = matchScrapingService.findMatchLink(TEAM_A, TEAM_B);
+        String matchUrl = matchScrapingService.findMatchLink(teamA, teamB);
 
         // Assert
         assertNull(matchUrl);
@@ -128,7 +128,7 @@ public class MatchScrapingServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // Act
-        String matchUrl = matchScrapingService.findMatchLink(TEAM_A, TEAM_B);
+        String matchUrl = matchScrapingService.findMatchLink(teamA, teamB);
 
         // Assert
         assertNull(matchUrl);
@@ -143,7 +143,7 @@ public class MatchScrapingServiceTest {
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                matchScrapingService.findMatchLink(TEAM_A, TEAM_B)
+                matchScrapingService.findMatchLink(teamA, teamB)
         );
         assertTrue(exception.getMessage().contains("Error scraping match links"));
         verify(mockDriver, never()).quit(); // Driver was not successfully initialized
@@ -157,7 +157,7 @@ public class MatchScrapingServiceTest {
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                matchScrapingService.findMatchLink(TEAM_A, TEAM_B)
+                matchScrapingService.findMatchLink(teamA, teamB)
         );
         assertTrue(exception.getMessage().contains("Error scraping match links"));
         verify(mockDriver).quit(); // Driver was initialized
@@ -168,22 +168,22 @@ public class MatchScrapingServiceTest {
     @Test
     void getPreviousMeetings_shouldReturnEmptyList_whenMatchLinkIsNotFound() {
         // Arrange
-        doReturn(null).when(matchScrapingService).findMatchLink(TEAM_A, TEAM_B);
+        doReturn(null).when(matchScrapingService).findMatchLink(teamA, teamB);
 
         // Act
-        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(TEAM_A, TEAM_B);
+        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(teamA, teamB);
 
         // Assert
         assertTrue(previousMeetings.isEmpty());
         // Ensure setupDriverAndNavigate for previous meetings page is not called
-        verify(matchScrapingService, times(0)).setupDriverAndNavigate(EXPECTED_MATCH_URL);
+        verify(matchScrapingService, times(0)).setupDriverAndNavigate(expectedMatchUrl);
     }
 
     @Test
     void getPreviousMeetings_shouldReturnListOfMatches_whenDataIsScrapedSuccessfully() {
         // Arrange
-        doReturn(EXPECTED_MATCH_URL).when(matchScrapingService).findMatchLink(TEAM_A, TEAM_B);
-        // setupDriverAndNavigate is already mocked in @BeforeEach to return mockDriver for EXPECTED_MATCH_URL
+        doReturn(expectedMatchUrl).when(matchScrapingService).findMatchLink(teamA, teamB);
+        // setupDriverAndNavigate is already mocked in @BeforeEach to return mockDriver for expectedMatchUrl
 
         when(mockDriver.findElement(By.id("previous-meetings-grid"))).thenReturn(mockGridElement);
         when(mockGridElement.findElements(By.className("divtable-row"))).thenReturn(Collections.singletonList(mockRowElement));
@@ -200,9 +200,9 @@ public class MatchScrapingServiceTest {
         WebElement mockHomeTeamEl = mock(WebElement.class);
         WebElement mockAwayTeamEl = mock(WebElement.class);
         when(mockRowElement.findElement(By.cssSelector(".horizontal-match-display.team.home .team-link"))).thenReturn(mockHomeTeamEl);
-        when(mockHomeTeamEl.getText()).thenReturn(TEAM_A);
+        when(mockHomeTeamEl.getText()).thenReturn(teamA);
         when(mockRowElement.findElement(By.cssSelector(".horizontal-match-display.team.away .team-link"))).thenReturn(mockAwayTeamEl);
-        when(mockAwayTeamEl.getText()).thenReturn(TEAM_B);
+        when(mockAwayTeamEl.getText()).thenReturn(teamB);
 
         // Mock extractScores
         WebElement mockResultEl = mock(WebElement.class);
@@ -215,25 +215,25 @@ public class MatchScrapingServiceTest {
         when(mockRowElement.findElement(By.cssSelector(".stacked-teams-display .team.winner .team-link"))).thenThrow(NoSuchElementException.class);
 
         // Act
-        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(TEAM_A, TEAM_B);
+        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(teamA, teamB);
 
         // Assert
         assertEquals(1, previousMeetings.size());
         Match match = previousMeetings.get(0);
         assertEquals("match123", match.getId());
         assertEquals("01 Jan 2023", match.getDate());
-        assertEquals(TEAM_A, match.getHomeTeam());
-        assertEquals(TEAM_B, match.getAwayTeam());
+        assertEquals(teamA, match.getHomeTeam());
+        assertEquals(teamB, match.getAwayTeam());
         assertEquals("2", match.getHomeScore());
         assertEquals("1", match.getAwayScore());
-        assertEquals(TEAM_A, match.getWinner()); // Winner determined by score comparison
+        assertEquals(teamA, match.getWinner()); // Winner determined by score comparison
 
         verify(mockDriver).quit();
     }
 
     @Test
     void getPreviousMeetings_shouldCorrectlyExtractStackedDate() {
-        doReturn(EXPECTED_MATCH_URL).when(matchScrapingService).findMatchLink(TEAM_A, TEAM_B);
+        doReturn(expectedMatchUrl).when(matchScrapingService).findMatchLink(teamA, teamB);
         when(mockDriver.findElement(By.id("previous-meetings-grid"))).thenReturn(mockGridElement);
         when(mockGridElement.findElements(By.className("divtable-row"))).thenReturn(Collections.singletonList(mockRowElement));
         when(mockRowElement.getAttribute("data-id")).thenReturn("matchStackedDate");
@@ -250,7 +250,7 @@ public class MatchScrapingServiceTest {
         setupMinimalRowMocksForNonDateExtraction(mockRowElement);
 
 
-        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(TEAM_A, TEAM_B);
+        List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(teamA, teamB);
         assertEquals("15 Feb 2024", previousMeetings.get(0).getDate());
         verify(mockDriver).quit();
     }
@@ -258,13 +258,13 @@ public class MatchScrapingServiceTest {
     @Test
     void getPreviousMeetings_shouldThrowScrappingException_whenSeleniumErrorOccurs() {
         // Arrange
-        doReturn(EXPECTED_MATCH_URL).when(matchScrapingService).findMatchLink(TEAM_A, TEAM_B);
+        doReturn(expectedMatchUrl).when(matchScrapingService).findMatchLink(teamA, teamB);
         doThrow(new RuntimeException("Selenium connection failed during previous meetings"))
-                .when(matchScrapingService).setupDriverAndNavigate(EXPECTED_MATCH_URL);
+                .when(matchScrapingService).setupDriverAndNavigate(expectedMatchUrl);
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                matchScrapingService.getPreviousMeetings(TEAM_A, TEAM_B)
+                matchScrapingService.getPreviousMeetings(teamA, teamB)
         );
         assertTrue(exception.getMessage().contains("Error scraping previous meetings"));
         verify(mockDriver, never()).quit(); // Driver not set up for this part
@@ -273,7 +273,7 @@ public class MatchScrapingServiceTest {
     @Test
     void getPreviousMeetings_shouldThrowScrappingException_whenElementFindingErrorOccurs() {
         // Arrange
-        doReturn(EXPECTED_MATCH_URL).when(matchScrapingService).findMatchLink(TEAM_A, TEAM_B);
+        doReturn(expectedMatchUrl).when(matchScrapingService).findMatchLink(teamA, teamB);
         // setupDriverAndNavigate is mocked to return mockDriver
 
         when(mockDriver.findElement(By.id("previous-meetings-grid")))
@@ -281,7 +281,7 @@ public class MatchScrapingServiceTest {
 
         // Act & Assert
         ScrappingException exception = assertThrows(ScrappingException.class, () ->
-                matchScrapingService.getPreviousMeetings(TEAM_A, TEAM_B)
+                matchScrapingService.getPreviousMeetings(teamA, teamB)
         );
         assertTrue(exception.getMessage().contains("Error scraping previous meetings"));
         verify(mockDriver).quit(); // Driver was initialized
@@ -293,9 +293,9 @@ public class MatchScrapingServiceTest {
         WebElement mockHomeTeamEl = mock(WebElement.class);
         WebElement mockAwayTeamEl = mock(WebElement.class);
         lenient().when(rowElement.findElement(By.cssSelector(".horizontal-match-display.team.home .team-link"))).thenReturn(mockHomeTeamEl);
-        lenient().when(mockHomeTeamEl.getText()).thenReturn(TEAM_A);
+        lenient().when(mockHomeTeamEl.getText()).thenReturn(teamA);
         lenient().when(rowElement.findElement(By.cssSelector(".horizontal-match-display.team.away .team-link"))).thenReturn(mockAwayTeamEl);
-        lenient().when(mockAwayTeamEl.getText()).thenReturn(TEAM_B);
+        lenient().when(mockAwayTeamEl.getText()).thenReturn(teamB);
         // Scores (default to empty or non-impacting values)
         WebElement mockResultEl = mock(WebElement.class);
         lenient().when(rowElement.findElement(By.cssSelector(".result > a.horiz-match-link"))).thenReturn(mockResultEl);
