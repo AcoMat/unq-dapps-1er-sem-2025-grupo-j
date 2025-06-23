@@ -74,8 +74,6 @@ public class TeamControllerE2ETest {
     @Test
     @WithMockUser
     public void getTeamPlayers_whenTeamExists_shouldReturnPlayerList() throws Exception {
-        long nonExistentTeamId = 0;
-
         final ResultActions result = this.mockMvc.perform(get("/teams/river/argentina/players")
                 .contentType(MediaType.APPLICATION_JSON));
 

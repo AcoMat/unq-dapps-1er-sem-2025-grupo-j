@@ -3,9 +3,7 @@ package unq.dapp.grupoj.soccergenius.architecture;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 @AnalyzeClasses(packages = "unq.dapp.grupoj.soccergenius")
 public class ControllerClassNameTest {

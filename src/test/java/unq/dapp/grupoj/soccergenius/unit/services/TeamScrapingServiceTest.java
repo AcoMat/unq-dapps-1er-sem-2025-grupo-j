@@ -13,13 +13,8 @@ import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
-
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
