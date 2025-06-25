@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("unit")
 public class JwtTokenProviderTest {
     private JwtTokenProvider jwtTokenProvider;
-    private static final String TEST_JWT_SECRET_KEY = System.getenv("JWT_SECRET_KEY_SOCCERGENIUS");
+    private static final String TEST_JWT_SECRET_KEY = System.getenv("JWT_SECRET_KEY_SOCCER_GENIUS");
     private static final long EXPIRATION_TIME_MS = 1000L * 60 * 60;
     private static final Long TEST_USER_ID = 123L;
     private Algorithm testAlgorithm;
@@ -36,7 +36,6 @@ public class JwtTokenProviderTest {
         assertNotNull(token);
         assertFalse(token.isEmpty());
 
-        // Verificar el token con la misma lógica y secreto esperado
         String subject = JWT.require(testAlgorithm)
                 .build()
                 .verify(token)
