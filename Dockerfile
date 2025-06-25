@@ -12,11 +12,18 @@ RUN apt-get update && apt-get install -y wget gnupg2 curl unzip gnupg ca-certifi
     && apt-get update && apt-get install -y google-chrome-stable \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables
-ENV FOOTBALL_DATA_API_KEY=857fc286146d4229969554d43038d22e \
-    GOOGLE_API_KEY=AIzaSyCbGx3kqdDlTzn9dV-xjNfpD_GU3nUCPmc \
-    JWT_SECRET_KEY_SOCCER_GENIUS=12345 \
-    SOCCER_GENIUS_DB_PASSWORD=password
+# Define build arguments for sensitive data
+ARG FOOTBALL_DATA_API_KEY
+ARG GOOGLE_API_KEY
+ARG JWT_SECRET_KEY
+ARG DB_PASSWORD
+
+# Set environment variables from build arguments
+# This prevents secrets from being stored in image history
+ENV FOOTBALL_DATA_API_KEY=${FOOTBALL_DATA_API_KEY} \
+    GOOGLE_API_KEY=${GOOGLE_API_KEY} \
+    JWT_SECRET_KEY_SOCCER_GENIUS=${JWT_SECRET_KEY} \
+    SOCCER_GENIUS_DB_PASSWORD=${DB_PASSWORD}
 
 # Copy Gradle files
 COPY build.gradle settings.gradle gradlew ./
