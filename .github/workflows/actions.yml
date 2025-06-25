@@ -24,7 +24,7 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Install Chrome for Selenium WebDriver
+      - name: Install Google Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y wget gnupg2 curl unzip gnupg ca-certificates fonts-liberation
@@ -34,17 +34,20 @@ jobs:
           sudo apt-get install -y google-chrome-stable
           sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
+      - name: Export CHROME_OPTS for WebDriver headless
+        run: echo "CHROME_OPTS=--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1280,800" >> $GITHUB_ENV
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build and Test with Gradle
+      - name: Run tests with Gradle
         env:
           FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
           JWT_SECRET_KEY_SOCCER_GENIUS: ${{ secrets.JWT_SECRET_KEY_SOCCER_GENIUS }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: ./gradlew test
 
-      - name: SonarCloud Scan with Gradle
+      - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
