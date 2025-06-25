@@ -4,12 +4,12 @@ import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.*;
 import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchsDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
-import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
@@ -52,11 +52,9 @@ public class TeamServiceImpl implements TeamService {
             List<String> players = this.webScrapingService.getPlayersNamesFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
-        }catch (NoSuchElementException e){
-            return List.of();
-        }
-        catch (Exception e) {
-            throw new ScrappingException(e.getMessage());
+        } catch (NoSuchElementException e) {
+            logger.error("Team not found: {}", requestedTeamName);
+            throw new TeamNotFoundException("Team " + requestedTeamName + " not found in " + requestedCountry);
         }
     }
 
