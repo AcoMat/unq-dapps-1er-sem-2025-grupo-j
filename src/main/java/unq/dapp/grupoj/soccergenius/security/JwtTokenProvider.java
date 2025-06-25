@@ -4,17 +4,20 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import org.springframework.beans.factory.annotation.Value;
 import unq.dapp.grupoj.soccergenius.exceptions.TokenVerificationException;
 
 import java.util.Date;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class JwtTokenProvider {
 
-    private static final String JWT_SECRET_KEY_SOCCERGENIUS = System.getenv("JWT_SECRET_KEY_SOCCERGENIUS");
     private static final long EXPIRATION_TIME = 1000L * 60 * 60; // 1 hora
-    private static final Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY_SOCCERGENIUS);
+    private final Algorithm algorithm = Algorithm.HMAC256(System.getenv("JWT_SECRET_KEY_SOCCER_GENIUS"));
+
 
     public String generateToken(Long id) {
         return JWT.create()

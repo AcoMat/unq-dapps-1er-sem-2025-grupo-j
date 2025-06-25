@@ -1,27 +1,26 @@
 package unq.dapp.grupoj.soccergenius.unit.services;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.*;
+import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchDto;
+import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchsDto;
+import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataTeamDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
+import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
-import unq.dapp.grupoj.soccergenius.services.player.PlayerService;
 import unq.dapp.grupoj.soccergenius.services.team.TeamServiceImpl;
+import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
 
-import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("unit")
@@ -38,253 +36,105 @@ import static org.mockito.Mockito.*;
 public class TeamServiceTest {
     @Mock
     private TeamScrapingService webScrapingService;
-
-    @Mock
-    private PlayerService playerService; // Injected but not used by the methods under test
-
-    @Mock
-    private RestTemplate restTemplate;
-
     @Mock
     private TeamRepository teamRepository;
-
     @Mock
     private Mapper mapper;
-
+    @Mock
+    private FootballDataApiService footballDataApiService;
     @InjectMocks
     private TeamServiceImpl teamService;
-
-    private String teamName;
-    private String country;
-    private String sanitizedTeamName;
-    private String sanitizedCountry;
-
-    @BeforeEach
-    void setUp() {
-        teamName = "River Plate\n";
-        country = "Argentina\r";
-        sanitizedTeamName = "River Plate_";
-        sanitizedCountry = "Argentina_";
-    }
 
     // Tests for getTeamPlayers
     @Test
     void getTeamPlayers_Success() {
+        String teamName = "FC Barcelona";
+        String country = "Spain";
         List<String> mockPlayerIds = Arrays.asList("player1", "player2");
-        when(webScrapingService.getPlayersIdsFromTeam(sanitizedTeamName, sanitizedCountry))
-                .thenReturn(mockPlayerIds);
+
+        // Mock Scrapping
+        when(webScrapingService.getPlayersNamesFromTeam(anyString(), anyString())).thenReturn(mockPlayerIds);
 
         List<String> playerIds = teamService.getTeamPlayers(teamName, country);
 
+        // Assert
         assertNotNull(playerIds);
-        assertEquals(2, playerIds.size());
         assertEquals(mockPlayerIds, playerIds);
-        verify(webScrapingService, times(1)).getPlayersIdsFromTeam(sanitizedTeamName, sanitizedCountry);
+        verify(webScrapingService).getPlayersNamesFromTeam(InputSanitizer.sanitizeInput(teamName), InputSanitizer.sanitizeInput(country));
     }
 
     @Test
     void getTeamPlayers_ScrappingError() {
-        when(webScrapingService.getPlayersIdsFromTeam(sanitizedTeamName, sanitizedCountry))
-                .thenThrow(new RuntimeException("Scraping failed"));
+        String teamName = "FC Barcelona";
+        String country = "Spain";
 
-        ScrappingException exception = assertThrows(ScrappingException.class, () -> {
-            teamService.getTeamPlayers(teamName, country);
-        });
+        // Mock scraping failure
+        when(webScrapingService.getPlayersNamesFromTeam(anyString(), anyString()))
+            .thenThrow(new ScrappingException("Error scraping players"));
 
-        assertEquals("Scraping failed", exception.getMessage());
-        verify(webScrapingService, times(1)).getPlayersIdsFromTeam(sanitizedTeamName, sanitizedCountry);
+        // Assert exception is thrown
+        ScrappingException exception = assertThrows(ScrappingException.class, () -> teamService.getTeamPlayers(teamName, country));
+
+        assertEquals("Error scraping players", exception.getMessage());
+        verify(webScrapingService).getPlayersNamesFromTeam(InputSanitizer.sanitizeInput(teamName), InputSanitizer.sanitizeInput(country));
     }
 
     // Tests for getUpcomingMatches
     @Test
     void getUpcomingMatches_Success() {
         String teamNameInput = "FC Barcelona";
-        int teamId = 123;
+        String sanitizedTeamName = InputSanitizer.sanitizeInput(teamNameInput);
 
-        // Mocking first API call (get teams from competition)
-        Team teamInCompetition = new Team();
-        teamInCompetition.setId(teamId);
-        teamInCompetition.setName("FC Barcelona");
-        List<Team> teamsList = Collections.singletonList(teamInCompetition);
+        // Create mock data for FootballDataMatchsDto
+        FootballDataTeamDto homeTeam1 = new FootballDataTeamDto(1, "FC Barcelona", "Barca", "FCB", "https://crests.football-data.org/fcb.png");
+        FootballDataTeamDto awayTeam1 = new FootballDataTeamDto(2, "Real Madrid", "Real", "RMA", "https://crests.football-data.org/rma.png");
+        FootballDataMatchDto match1 = new FootballDataMatchDto("2025-07-01T20:00:00Z", homeTeam1, awayTeam1, null);
 
-        // Assuming CompetitionDTO constructor takes (param1, param2, List<Team>)
-        // You'll need to replace null with actual objects or mocks if the constructor
-        // requires non-null values for the first two parameters and they are used.
-        // For this test's purpose, if only the 'teams' list is relevant from CompetitionDTO,
-        // nulls for other parameters might be acceptable.
-        CompetitionDTO competitionDTO = new CompetitionDTO(null, null, teamsList); // Adjusted instantiation
+        FootballDataTeamDto homeTeam2 = new FootballDataTeamDto(3, "Atletico Madrid", "Atleti", "ATM", "https://crests.football-data.org/atm.png");
+        FootballDataTeamDto awayTeam2 = new FootballDataTeamDto(1, "FC Barcelona", "Barca", "FCB", "https://crests.football-data.org/fcb.png");
+        FootballDataMatchDto match2 = new FootballDataMatchDto("2025-07-15T19:30:00Z", homeTeam2, awayTeam2, null);
 
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/competitions/2014/teams"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
+        List<FootballDataMatchDto> matches = Arrays.asList(match1, match2);
+        FootballDataMatchsDto mockResponse = mock(FootballDataMatchsDto.class);
+        when(mockResponse.getMatches()).thenReturn(matches);
 
-        // Mocking second API call (get matches for the team)
-        FootballApiResponseDTO apiResponseDTO = new FootballApiResponseDTO();
+        // Mock API call
+        when(footballDataApiService.getUpcomingMatchesFromTeam(sanitizedTeamName)).thenReturn(mockResponse);
 
-        // Simulate raw DTOs from API (unq.dapp.grupoj.soccergenius.model.footballApi.MatchDTO)
-        // These raw DTOs still use ZonedDateTime, as the service method is responsible for conversion.
-        MatchDTO rawMatch1 = new MatchDTO();
-        rawMatch1.setLocalTeam("FC Barcelona");
-        rawMatch1.setVisitorTeam("Real Madrid");
-        rawMatch1.setCompetition("La Liga");
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now().plusDays(7);
-        String dateAsString = zonedDateTime.toString();
-        rawMatch1.setUtcDate(dateAsString);
-
-        MatchDTO rawMatch2 = new MatchDTO();
-        rawMatch2.setLocalTeam("Valencia CF");
-        rawMatch2.setVisitorTeam("FC Barcelona");
-        rawMatch2.setCompetition("La Liga");
-
-        zonedDateTime = ZonedDateTime.now().plusDays(14);
-        dateAsString = zonedDateTime.toString();
-        rawMatch2.setUtcDate(dateAsString);
-
-        apiResponseDTO.setMatches(Arrays.asList(rawMatch1, rawMatch2));
-        ResponseEntity<FootballApiResponseDTO> matchesResponseEntity = new ResponseEntity<>(apiResponseDTO, HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/teams/" + teamId + "/matches?status=SCHEDULED"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(FootballApiResponseDTO.class)))
-                .thenReturn(matchesResponseEntity);
-
-        // Act
-        List<MatchDTO> upcomingMatches = teamService.getUpcomingMatches(teamNameInput);
+        // Call service method
+        List<MatchDTO> result = teamService.getUpcomingMatches(teamNameInput);
 
         // Assert
-        assertNotNull(upcomingMatches);
-        assertEquals(2, upcomingMatches.size());
-        // Assertions for MatchDTO properties (localTeam, visitorTeam, competition)
-        // If MatchDTO now stores date as String, and you needed to assert it,
-        // you would compare against the expected string representation.
-        // The current assertions don't check the date.
-        assertEquals("FC Barcelona", upcomingMatches.getFirst().getLocalTeam());
-        assertEquals("Real Madrid", upcomingMatches.getFirst().getVisitorTeam());
-        assertEquals("La Liga", upcomingMatches.getFirst().getCompetition());
+        assertNotNull(result);
+        assertEquals(2, result.size());
 
-        verify(restTemplate, times(2)).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), any(Class.class));
+        // Check first match details
+        MatchDTO firstMatch = result.getFirst();
+        assertEquals("FC Barcelona", firstMatch.getLocalTeam());
+        assertEquals("Real Madrid", firstMatch.getVisitorTeam());
+        assertEquals("La Liga", firstMatch.getCompetition());
+        assertEquals("2025-07-01T20:00:00Z", firstMatch.getUtcDate());
+
+        // Check second match details
+        MatchDTO secondMatch = result.get(1);
+        assertEquals("Atletico Madrid", secondMatch.getLocalTeam());
+        assertEquals("FC Barcelona", secondMatch.getVisitorTeam());
+        assertEquals("La Liga", secondMatch.getCompetition());
+        assertEquals("2025-07-15T19:30:00Z", secondMatch.getUtcDate());
+
+        // Verify calls
+        verify(footballDataApiService).getUpcomingMatchesFromTeam(sanitizedTeamName);
     }
 
     @Test
-    void getUpcomingMatches_SuccessWithUnknownTeamNamesAndCompetition() {
+    void getUpcomingMatches_ThrowErrorWithUnknownTeamNamesAndCompetition() {
+        // Arrange
         String teamNameInput = "FC Test";
-        int teamId = 789;
-
-        // Mocking first API call (get teams from competition)
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = getCompetitionDTOResponseEntity(teamId);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
-
-        // Mocking second API call (get matches for the team)
-        FootballApiResponseDTO apiResponseDTO = new FootballApiResponseDTO();
-
-        MatchDTO rawMatch = new MatchDTO();
-        rawMatch.setLocalTeam(null); // Simulate null from API
-        rawMatch.setVisitorTeam(null); // Simulate null from API
-        rawMatch.setCompetition(null); // Simulate null from API
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now().plusDays(5);
-        String dateAsString = zonedDateTime.toString();
-        rawMatch.setUtcDate(dateAsString);
-
-        apiResponseDTO.setMatches(Collections.singletonList(rawMatch));
-        ResponseEntity<FootballApiResponseDTO> matchesResponseEntity = new ResponseEntity<>(apiResponseDTO, HttpStatus.OK);
-        when(restTemplate.exchange(contains("/teams/" + teamId + "/matches"), eq(HttpMethod.GET), any(HttpEntity.class), eq(FootballApiResponseDTO.class)))
-                .thenReturn(matchesResponseEntity);
-
-        // Act
-        List<MatchDTO> upcomingMatches = teamService.getUpcomingMatches(teamNameInput);
-
-        // Assert
-        assertNotNull(upcomingMatches);
-        assertEquals(1, upcomingMatches.size());
-        assertEquals("Unknown", upcomingMatches.getFirst().getLocalTeam());
-        assertEquals("Unknown", upcomingMatches.getFirst().getVisitorTeam());
-        assertEquals("Unknown", upcomingMatches.getFirst().getCompetition());
-    }
-
-    private static ResponseEntity<CompetitionDTO> getCompetitionDTOResponseEntity(int teamId) {
-        Team teamInCompetition = new Team();
-        teamInCompetition.setId(teamId);
-        teamInCompetition.setName("FC Test"); // Exact match for simplicity
-        List<Team> teamsList = Collections.singletonList(teamInCompetition);
-        String dummyCompetitionName = "Test Competition";
-        String dummyCompetitionId = "COMP_TEST_001";
-        CompetitionDTO competitionDTO = new CompetitionDTO(dummyCompetitionName, dummyCompetitionId, teamsList);
-
-        return new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-    }
-
-    @Test
-    void getUpcomingMatches_ApiReturnsNullMatches() {
-        String teamNameInput = "FC Barcelona";
-        int teamId = 123;
-
-        CompetitionDTO competitionDTO = new CompetitionDTO();
-        Team teamInCompetition = new Team();
-        teamInCompetition.setId(teamId);
-        teamInCompetition.setName("FC Barcelona");
-        competitionDTO.setTeams(Collections.singletonList(teamInCompetition));
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/competitions/2014/teams"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
-
-        FootballApiResponseDTO apiResponseDTO = new FootballApiResponseDTO();
-        apiResponseDTO.setMatches(null); // Simulate API returning null for matches list
-        ResponseEntity<FootballApiResponseDTO> matchesResponseEntity = new ResponseEntity<>(apiResponseDTO, HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/teams/" + teamId + "/matches?status=SCHEDULED"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(FootballApiResponseDTO.class)))
-                .thenReturn(matchesResponseEntity);
-
-        List<MatchDTO> upcomingMatches = teamService.getUpcomingMatches(teamNameInput);
-
-        assertNotNull(upcomingMatches);
-        assertTrue(upcomingMatches.isEmpty());
-    }
-
-    @Test
-    void getUpcomingMatches_ApiReturnsNullBodyForMatches() {
-        String teamNameInput = "FC Barcelona";
-        int teamId = 123;
-
-        CompetitionDTO competitionDTO = new CompetitionDTO();
-        Team teamInCompetition = new Team();
-        teamInCompetition.setId(teamId);
-        teamInCompetition.setName("FC Barcelona");
-        competitionDTO.setTeams(Collections.singletonList(teamInCompetition));
-        ResponseEntity<CompetitionDTO> competitionResponseEntity = new ResponseEntity<>(competitionDTO, HttpStatus.OK);
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/competitions/2014/teams"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(CompetitionDTO.class)))
-                .thenReturn(competitionResponseEntity);
-
-        ResponseEntity<FootballApiResponseDTO> matchesResponseEntity = new ResponseEntity<>(null, HttpStatus.OK); // Null body
-        when(restTemplate.exchange(
-                eq("https://api.football-data.org/v4/teams/" + teamId + "/matches?status=SCHEDULED"),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(FootballApiResponseDTO.class)))
-                .thenReturn(matchesResponseEntity);
-
-        List<MatchDTO> upcomingMatches = teamService.getUpcomingMatches(teamNameInput);
-
-        assertNotNull(upcomingMatches);
-        assertTrue(upcomingMatches.isEmpty());
+        when(footballDataApiService.getUpcomingMatchesFromTeam(anyString()))
+                .thenThrow(new IllegalArgumentException("Unknown team name"));
+        // Act and Assert
+        assertThrows(IllegalArgumentException.class, () ->
+                teamService.getUpcomingMatches(teamNameInput), "Should throw IllegalArgumentException when team name is unknown");
     }
 
     // Tests for getTeamFromLaLigaById
@@ -336,9 +186,7 @@ public class TeamServiceTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
         when(webScrapingService.scrapTeamDataById(teamId)).thenThrow(new ScrappingException("Failed to scrape team"));
 
-        ScrappingException exception = assertThrows(ScrappingException.class, () -> {
-            teamService.getTeamFromLaLigaById(teamId);
-        });
+        ScrappingException exception = assertThrows(ScrappingException.class, () -> teamService.getTeamFromLaLigaById(teamId));
 
         assertEquals("Failed to scrape team", exception.getMessage());
         verify(teamRepository, times(1)).findById(teamId);
@@ -402,9 +250,7 @@ public class TeamServiceTest {
         when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA)))
                 .thenThrow(new ScrappingException("Error scraping team A"));
 
-        ScrappingException thrown = assertThrows(ScrappingException.class, () -> {
-            teamService.getTeamsComparison(teamIdA, teamIdB);
-        });
+        ScrappingException thrown = assertThrows(ScrappingException.class, () -> teamService.getTeamsComparison(teamIdA, teamIdB));
 
         assertTrue(thrown.getMessage().contains("Error scraping team A"));
 
@@ -418,9 +264,7 @@ public class TeamServiceTest {
         String teamIdA = "invalid-id";
         String teamIdB = "2";
 
-        assertThrows(NumberFormatException.class, () -> {
-            teamService.getTeamsComparison(teamIdA, teamIdB);
-        });
+        assertThrows(NumberFormatException.class, () -> teamService.getTeamsComparison(teamIdA, teamIdB));
 
         verifyNoInteractions(webScrapingService);
     }
