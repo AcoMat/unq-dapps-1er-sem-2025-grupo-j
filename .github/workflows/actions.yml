@@ -28,7 +28,8 @@ jobs:
       - name: Build and Test with Gradle
         env:
           FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALLDATA_TOKEN }}
-          JWT_SECRET_KEY_SOCCERGENIUS: ${{ secrets.JWT_SECRET_KEY_SOCCERGENIUS }}
+          JWT_SECRET_KEY_SOCCER_GENIUS: ${{ secrets.JWT_SECRET_KEY_SOCCERGENIUS }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: ./gradlew test
       - name: SonarCloud Scan with Gradle
         env:
