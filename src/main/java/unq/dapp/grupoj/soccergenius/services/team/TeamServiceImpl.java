@@ -3,19 +3,18 @@ package unq.dapp.grupoj.soccergenius.services.team;
 import org.openqa.selenium.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.UnknownContentTypeException;
 import unq.dapp.grupoj.soccergenius.mappers.Mapper;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.model.dtos.*;
+import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchsDto;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
-import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
+import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -24,7 +23,7 @@ public class TeamServiceImpl implements TeamService {
 
     private final TeamScrapingService webScrapingService;
 
-    private final RestTemplate restTemplate;
+    private final FootballDataApiService footballDataApiService;
     private final TeamRepository teamRepository;
     private final Mapper mapper;
 
@@ -32,24 +31,25 @@ public class TeamServiceImpl implements TeamService {
             (TeamScrapingService webScrapingService,
              TeamRepository teamRepository,
              Mapper mapper,
-             RestTemplate restTemplate
+             FootballDataApiService footballDataApiService
         ) {
         this.webScrapingService = webScrapingService;
-        this.restTemplate = restTemplate;
+        this.footballDataApiService = footballDataApiService;
         this.teamRepository = teamRepository;
         this.mapper = mapper;
     }
 
     @Override
     public List<String> getTeamPlayers(String teamName, String country) {
-
-        //TODO: abstract sanitization to a method
-        String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
-        String requestedCountry = country.replaceAll("[\n\r]", "_");
+        if (teamName == null || teamName.isEmpty()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
+        String requestedTeamName = InputSanitizer.sanitizeInput(teamName);
+        String requestedCountry = InputSanitizer.sanitizeInput(country);
 
         logger.debug("Fetching players for team {} in country {}", requestedTeamName, requestedCountry);
         try {
-            List<String> players = this.webScrapingService.getPlayersIdsFromTeam(requestedTeamName, requestedCountry);
+            List<String> players = this.webScrapingService.getPlayersNamesFromTeam(requestedTeamName, requestedCountry);
             logger.debug("Retrieved {} players for team {}", players.size(), requestedTeamName);
             return players;
         }catch (NoSuchElementException e){
@@ -62,53 +62,32 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<MatchDTO> getUpcomingMatches(String teamName) {
-        final String FOOTBALLDATA_SECRET = System.getenv("FOOTBALLDATA_TOKEN");
-        String apiUrlGetTeams = "https://api.football-data.org/v4/competitions/2014/teams";
+        logger.debug("Fetching upcoming matches for team {}", teamName);
+        if (teamName == null || teamName.isEmpty()) {
+            throw new IllegalArgumentException("Team name cannot be null or empty");
+        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Auth-Token",FOOTBALLDATA_SECRET);
+        String requestedTeamName = InputSanitizer.sanitizeInput(teamName);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        FootballDataMatchsDto footballDataMatchsDto = this.footballDataApiService.getUpcomingMatchesFromTeam(requestedTeamName);
 
-        try {
-            ResponseEntity<CompetitionDTO> competitionDTOResponseEntity = restTemplate.exchange(apiUrlGetTeams, HttpMethod.GET, entity, CompetitionDTO.class);
-            List<Team> competitionTeams = competitionDTOResponseEntity.getBody().getTeams();
-
-            int idTeam = competitionTeams.stream()
-                    .filter(team -> team.getName().toLowerCase().contains(teamName.toLowerCase()))
-                    .findFirst()
-                    .map(Team::getId)
-                    .orElseThrow(() -> new RuntimeException("Equipo no encontrado: " + teamName));
-
-            String apiUrlGetOneTeam = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED" .replace("id", String.valueOf(idTeam));
-
-            ResponseEntity<FootballApiResponseDTO> response = restTemplate.exchange(apiUrlGetOneTeam, HttpMethod.GET, entity, FootballApiResponseDTO.class);
-
-            FootballApiResponseDTO apiResponse = response.getBody();
-
-            if (apiResponse != null && apiResponse.getMatches() != null) {
-                final String unknown = "Unknown";
-                List<MatchDTO> upcomingMatches = apiResponse.getMatches().stream()
-                        .map(matchDto -> {
-                            String homeTeamName = matchDto.getLocalTeam() != null ? matchDto.getLocalTeam() : unknown;
-                            String awayTeamName = matchDto.getVisitorTeam() != null ? matchDto.getVisitorTeam() : unknown;
-                            String competition = matchDto.getCompetition() != null ? matchDto.getCompetition() : unknown;
-
-                            return new MatchDTO(homeTeamName, awayTeamName, competition, matchDto.getUtcDate());
-                        })
-                        .collect(Collectors.toList());
-
-                logger.debug("Retrieved {} upcoming matches for team {}", upcomingMatches.size(), teamName);
-                return upcomingMatches;
-            } else {
-                logger.warn("No upcoming matches found or error in API response for team {}", teamName);
-                return List.of();
-            }
-        } catch (Exception e) {
-            logger.error("Error fetching upcoming matches for team {}: {}", teamName, e.getMessage(), e);
+        if (footballDataMatchsDto == null || footballDataMatchsDto.getMatches() == null) {
+            logger.debug("No upcoming matches found for team {}", requestedTeamName);
             return List.of();
         }
+
+        List<MatchDTO> upcomingMatches = footballDataMatchsDto.getMatches().stream()
+                .map(match -> {
+                    String homeTeamName = match.getHomeTeam() != null ? match.getHomeTeam().getName() : "Unknown";
+                    String awayTeamName = match.getAwayTeam() != null ? match.getAwayTeam().getName() : "Unknown";
+                    String utcDate = match.getUtcDate();
+
+                    return new MatchDTO(homeTeamName, awayTeamName, "La Liga", utcDate);
+                }).toList();
+
+        logger.debug("Retrieved {} upcoming matches for team {}", upcomingMatches.size(), teamName);
+        return upcomingMatches;
+
     }
 
     @Override
@@ -116,11 +95,10 @@ public class TeamServiceImpl implements TeamService {
         TeamStatisticsDTO teamA = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA));
         TeamStatisticsDTO teamB = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB));
 
-        ComparisonDto comparisonDto = ComparisonDto.builder()
+        return ComparisonDto.builder()
                                         .teamB(teamB)
                                         .teamA(teamA)
                                         .build();
-        return comparisonDto;
     }
 
     @Override
