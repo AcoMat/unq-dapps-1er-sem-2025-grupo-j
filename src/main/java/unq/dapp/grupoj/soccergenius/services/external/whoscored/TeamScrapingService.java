@@ -20,7 +20,7 @@ public class TeamScrapingService extends WebScrapingService {
 
     final String baseUrlTeams = "https://es.whoscored.com/teams/";
 
-    public List<String> getPlayersIdsFromTeam(String teamName, String country) {
+    public List<String> getPlayersNamesFromTeam(String teamName, String country) {
         WebDriver driver = null;
         try {
             String urlTmp = BASE_URL + "/search/?t=" + teamName;
@@ -49,7 +49,7 @@ public class TeamScrapingService extends WebScrapingService {
                 throw new TeamNotFoundException("Team " + teamName + " not found in country " + country);
             }
             driver.navigate().to(teamUrl);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("player-table-statistics-body")));
 
             WebElement playerList = driver.findElement(By.id("player-table-statistics-body"));
@@ -74,7 +74,7 @@ public class TeamScrapingService extends WebScrapingService {
         WebDriver driver = null;
         try {
             driver = setupDriverAndNavigate(url);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
 
             WebElement tableBody = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("standings-15375-content")));
             List<WebElement> rows = tableBody.findElements(By.tagName("tr"));
@@ -136,7 +136,7 @@ public class TeamScrapingService extends WebScrapingService {
             driver = setupDriverAndNavigate(url);
 
             // Wait for the table to load
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
             String ratingXPath = "//tbody[@id='top-team-stats-summary-content']/tr[last()]/td[@class='rating']/strong";
 
             // Wait for the rating element to be visible
@@ -216,7 +216,7 @@ public class TeamScrapingService extends WebScrapingService {
         String url = baseUrlTeams + teamId;
         driver = setupDriverAndNavigate(url);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
 
         WebElement countryNameContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
