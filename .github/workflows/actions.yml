@@ -5,7 +5,6 @@ on:
     branches: [ "main", "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
-
   workflow_dispatch:
 
 jobs:
@@ -17,20 +16,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: 'gradle'
+
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg2 curl unzip ca-certificates fonts-liberation
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
       - name: Build and Test with Gradle
         env:
           FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
           JWT_SECRET_KEY_SOCCER_GENIUS: ${{ secrets.JWT_SECRET_KEY_SOCCER_GENIUS }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: ./gradlew test
+
       - name: SonarCloud Scan with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
