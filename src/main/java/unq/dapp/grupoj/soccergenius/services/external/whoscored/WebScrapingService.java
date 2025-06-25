@@ -20,7 +20,7 @@ public class WebScrapingService {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new"); // Modo headless moderno
         options.addArguments("--disable-gpu"); // Necesario a veces en headless
-        options.addArguments("--window-size=1920,1080"); // Definir tamaño puede ayudar
+        options.addArguments("--window-size=1280,800'"); // Definir tamaño puede ayudar
         options.addArguments("--no-sandbox"); // A veces necesario en entornos Linux/Docker
         options.addArguments("--disable-dev-shm-usage"); // A veces necesario en entornos Linux/Docker
         options.addArguments("user-agent=" + USER_AGENT); // Usar constante
