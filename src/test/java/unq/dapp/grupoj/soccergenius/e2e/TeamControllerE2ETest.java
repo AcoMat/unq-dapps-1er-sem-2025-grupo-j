@@ -1,6 +1,5 @@
 package unq.dapp.grupoj.soccergenius.e2e;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import java.util.List;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,12 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TeamControllerE2ETest {
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext context;
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
@@ -68,7 +64,7 @@ public class TeamControllerE2ETest {
                         .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isNotFound())
-                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof TeamNotFoundException));
+                .andExpect(mvcResult -> assertInstanceOf(TeamNotFoundException.class, mvcResult.getResolvedException()));
     }
 
     @Test
@@ -92,7 +88,7 @@ public class TeamControllerE2ETest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isNotFound());
-        result.andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof TeamNotFoundException));
+        result.andExpect(mvcResult -> assertInstanceOf(TeamNotFoundException.class, mvcResult.getResolvedException()));
     }
 
     /* TESTS DISABLED DUE API SUB CHANGES

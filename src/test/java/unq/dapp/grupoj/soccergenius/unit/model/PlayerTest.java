@@ -75,7 +75,7 @@ public class PlayerTest {
         int newAge = 37;
 
         // Introduce a small delay to ensure ZonedDateTime.now() will be different
-        Thread.sleep(10);
+        Thread.sleep(2);
 
         player.setAge(newAge);
 
@@ -87,7 +87,7 @@ public class PlayerTest {
     @Test
     void updateActualTeam_shouldUpdateTeamAndLastUpdate() throws InterruptedException {
         ZonedDateTime initialUpdateTime = player.getLastUpdate();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(2); // Ensure time difference
 
         player.updateActualTeam(mockTeam);
 
@@ -99,7 +99,7 @@ public class PlayerTest {
     @Test
     void setCurrentParticipationsSummary_shouldUpdateSummaryAndLastUpdate() throws InterruptedException {
         ZonedDateTime initialUpdateTime = player.getLastUpdate();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(2); // Ensure time difference
 
         player.setCurrentParticipationsSummary(mockCurrentSummary);
 
@@ -111,7 +111,7 @@ public class PlayerTest {
     @Test
     void setHistory_shouldUpdateHistoryAndLastUpdate() throws InterruptedException {
         ZonedDateTime initialUpdateTime = player.getLastUpdate();
-        Thread.sleep(10); // Ensure time difference
+        Thread.sleep(2); // Ensure time difference
 
         player.setHistory(mockHistoricalSummary);
 
@@ -189,9 +189,7 @@ public class PlayerTest {
     @Test
     void getPerformanceAndTendency_throwsNullPointerException_whenSummariesAreNull() {
         // Player is initialized with null summaries in setUp()
-        assertThrows(NullPointerException.class, () -> {
-            player.getPerformanceAndTendency();
-        });
+        assertThrows(NullPointerException.class, () -> player.getPerformanceAndTendency());
     }
 
 }
