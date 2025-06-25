@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
+import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.dtos.ComparisonDto;
 import unq.dapp.grupoj.soccergenius.model.dtos.MatchDTO;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
@@ -53,20 +53,16 @@ public class TeamController {
     public ResponseEntity<List<String>> getTeamPlayers (
             @Parameter(description = "Name of the team", example = "Barcelona") @PathVariable String teamName,
             @Parameter(description = "Country of the team", example = "Spain") @PathVariable String country) {
-        String requestedTeamName = teamName.replaceAll("[\n\r]", "_");
-        String requestedCountry = country.replaceAll("[\n\r]", "_");
-
         long startTime = System.currentTimeMillis();
         logger.info("Request received to get players from a team");
-
         try {
-            List<String> players = this.teamService.getTeamPlayers(requestedTeamName, requestedCountry);
+            List<String> players = this.teamService.getTeamPlayers(teamName, country);
             long endTime = System.currentTimeMillis();
-            logger.info("Successfully retrieved {} players for team in {} ms",
-                    players.size(), (endTime - startTime));
+            logger.info("Successfully retrieved {} players for team in {} ms", players.size(), (endTime - startTime));
             return ResponseEntity.status(HttpStatus.OK).body(players);
-        } catch (Exception e) {
-            throw new ScrappingException(e.getMessage());
+        } catch (TeamNotFoundException ex) {
+            logger.error("Team not found: {}", ex.getMessage());
+            throw ex; // Let the global exception handler handle it
         }
     }
 

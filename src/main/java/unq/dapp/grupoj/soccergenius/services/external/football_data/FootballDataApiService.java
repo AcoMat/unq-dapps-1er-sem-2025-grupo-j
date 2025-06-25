@@ -13,13 +13,11 @@ import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDa
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 @Service
 public class FootballDataApiService {
 
     private final RestTemplate restTemplate;
-    private final Map<Integer, Integer> whoScoredToFootballDataTeamIdMap;
 
     @Value("${FOOTBALL_DATA_API_KEY}")
     private String apiKey;
@@ -30,7 +28,6 @@ public class FootballDataApiService {
     @Autowired
     public FootballDataApiService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.whoScoredToFootballDataTeamIdMap = TeamIdMappingUtil.getWhoScoredToFootballDataTeamIdMap();
     }
 
     /**
@@ -39,14 +36,11 @@ public class FootballDataApiService {
      * @return Corresponding team ID for Football-data.org API or null if no mapping exists
      */
     public Integer convertWhoScoredIdToFootballDataId(int whoScoredTeamId) {
-        return whoScoredToFootballDataTeamIdMap.get(whoScoredTeamId);
+        return TeamIdMappingUtil.whoScoredToFootballDataTeamIdMap(whoScoredTeamId);
     }
 
     public FootballDataMatchsDto getLastXMatchesFromTeam(int teamId, int limit) {
-        Integer footballDataId = convertWhoScoredIdToFootballDataId(teamId);
-        if (footballDataId == null) {
-            throw new FootballDataApiException("No Football-data.org ID found for WhoScored team ID: " + teamId);
-        }
+        int footballDataId = TeamIdMappingUtil.whoScoredToFootballDataTeamIdMap(teamId);
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(1);
 
@@ -66,6 +60,29 @@ public class FootballDataApiService {
             entity,
             FootballDataMatchsDto.class
         );
+
+        return response.getBody();
+    }
+
+    public FootballDataMatchsDto getUpcomingMatchesFromTeam(String teamName) {
+        int footballDataId = TeamIdMappingUtil.footballDataTeamIdFromName(teamName);
+
+        String url = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id", String.valueOf(footballDataId));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Auth-Token", apiKey);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<FootballDataMatchsDto> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                FootballDataMatchsDto.class
+        );
+
+        if(response.getStatusCode().isError()) {
+            throw new FootballDataApiException("Error fetching upcoming matches for team: " + teamName);
+        }
 
         return response.getBody();
     }

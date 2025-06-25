@@ -110,8 +110,8 @@ public class MatchService {
         TeamDto team2 = teamService.getTeamFromLaLigaById(team2Id);
 
         // Obtener los IDs correctos para Football Data API
-        Integer footballDataTeam1Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team1Id);
-        Integer footballDataTeam2Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team2Id);
+        int footballDataTeam1Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team1Id);
+        int footballDataTeam2Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team2Id);
 
         List<FootballDataMatchDto> lastMatchesTeam1 = footballDataApiService.getLastXMatchesFromTeam(team1Id, 25).getMatches();
         List<FootballDataMatchDto> lastMatchesTeam2 = footballDataApiService.getLastXMatchesFromTeam(team2Id, 25).getMatches();

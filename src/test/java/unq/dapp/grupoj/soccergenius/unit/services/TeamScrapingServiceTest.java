@@ -80,7 +80,7 @@ public class TeamScrapingServiceTest {
     }
 
     @Test
-    void getPlayersIdsFromTeam_shouldThrowTeamNotFoundException_whenTeamNotInSearchResults() {
+    void getPlayersNamesFromTeam_shouldThrowTeamNotFoundException_whenTeamNotInSearchResults() {
         when(mockDriver.findElement(By.className("search-result"))).thenReturn(mockDivResult);
         when(mockDivResult.findElement(By.xpath("./table[1]"))).thenReturn(mockTeamsTable);
         when(mockTeamsTable.findElement(By.tagName("tbody"))).thenReturn(mockTbody);
@@ -91,17 +91,17 @@ public class TeamScrapingServiceTest {
         when(mockSpanPais.getText()).thenReturn(teamCountry);
 
         TeamNotFoundException exception = assertThrows(TeamNotFoundException.class, () ->
-                teamScrapingService.getPlayersIdsFromTeam(teamName, teamCountry)
+                teamScrapingService.getPlayersNamesFromTeam(teamName, teamCountry)
         );
         assertTrue(exception.getMessage().contains("Team " + teamName + " not found in country " + teamCountry));
         verify(mockDriver).quit();
     }
 
     @Test
-    void getPlayersIdsFromTeam_shouldThrowScrappingException_onSeleniumError() {
+    void getPlayersNamesFromTeam_shouldThrowScrappingException_onSeleniumError() {
         when(mockDriver.findElement(By.className("search-result"))).thenThrow(new NoSuchElementException("Search error"));
         assertThrows(NoSuchElementException.class, () ->
-                teamScrapingService.getPlayersIdsFromTeam(teamName, teamCountry)
+                teamScrapingService.getPlayersNamesFromTeam(teamName, teamCountry)
         );
         verify(mockDriver).quit();
     }

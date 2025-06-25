@@ -1,10 +1,12 @@
 package unq.dapp.grupoj.soccergenius.unit.config;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 import unq.dapp.grupoj.soccergenius.config.DataSeeder;
 import unq.dapp.grupoj.soccergenius.model.dtos.auth.RegisterFormDTO;
 import unq.dapp.grupoj.soccergenius.repository.PlayerRepository;
@@ -16,6 +18,8 @@ import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("unit")
+@Tag("unit")
 class DataSeederTest {
     @Mock
     private TeamRepository teamRepository;
