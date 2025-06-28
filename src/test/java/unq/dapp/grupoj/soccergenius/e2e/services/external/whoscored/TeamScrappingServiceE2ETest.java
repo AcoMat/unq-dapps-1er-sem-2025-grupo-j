@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamStatisticsDTO;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("e2e")
 @Tag("e2e")
@@ -31,7 +31,7 @@ public class TeamScrappingServiceE2ETest {
 
     @Test
     void scrapTeamStatisticsById_validTeamId_shouldReturnValidStats() {
-        int teamId = 86; // Real madrid
+        int teamId = 52; // Real madrid
 
         TeamStatisticsDTO result = service.scrapTeamStatisticsById(teamId);
 
@@ -49,22 +49,10 @@ public class TeamScrappingServiceE2ETest {
     }
 
     @Test
-    void scrapTeamStatisticsById_invalidTeamId_shouldReturnNull() {
-        int invalidTeamId = 9999; // Assuming this ID does not exist
+    void scrapTeamStatisticsById_invalidTeamId_shouldThrowException() {
+        int invalidTeamId = 99999; // Assuming this ID does not exist
 
-        TeamStatisticsDTO result = service.scrapTeamStatisticsById(invalidTeamId);
-
-        assertNotNull(result);
-        assertFalse(result.getName().isEmpty());
-        assertFalse(result.getTotalMatchesPlayedStr().isEmpty());
-        assertFalse(result.getTotalGoalsStr().isEmpty());
-        assertFalse(result.getAvgShotsPerGameStr().isEmpty());
-        assertFalse(result.getAvgPossessionStr().isEmpty());
-        assertFalse(result.getAvgPassSuccessStr().isEmpty());
-        assertFalse(result.getAvgAerialWonPerGameStr().isEmpty());
-        assertFalse(result.getOverallRatingStr().isEmpty());
-        assertFalse(result.getTotalYellowCardsStr().isEmpty());
-        assertFalse(result.getTotalRedCardsStr().isEmpty());
+        assertThrows(ScrappingException.class, () -> service.scrapTeamStatisticsById(invalidTeamId));
     }
 
 

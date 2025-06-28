@@ -217,13 +217,13 @@ public class TeamScrapingService extends WebScrapingService {
         try {
             driver = setupDriverAndNavigate(url);
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
 
-            WebElement countryNameContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("#breadcrumb-nav span.iconize.iconize-icon-left")
+            WebElement teamNameElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("span.team-header-name")
             ));
-            String teamName = countryNameContainer.getText().trim();
+            String teamName = teamNameElement.getText().trim();
 
             WebElement tableBody   = driver.findElement(By.id("top-team-stats-summary-content"));
             WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
