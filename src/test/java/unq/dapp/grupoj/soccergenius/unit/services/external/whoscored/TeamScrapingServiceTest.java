@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.unit.services;
+package unq.dapp.grupoj.soccergenius.unit.services.external.whoscored;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -13,6 +13,7 @@ import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
+
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +63,7 @@ class TeamScrapingServiceTest {
 
     private final String teamName = "FC Barcelona";
     private final String teamCountry = "Spain";
-    private final int teamId = 101;
+    private final int teamId = 86;
     private final int playerId = 789;
 
     @BeforeEach

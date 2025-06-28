@@ -12,6 +12,7 @@ import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDa
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import unq.dapp.grupoj.soccergenius.services.external.football_data.FootballDataApiService;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
+import unq.dapp.grupoj.soccergenius.util.WhoScoredIdsUtil;
 import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
 
 import java.util.List;
@@ -90,9 +91,25 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public ComparisonDto getTeamsComparison(String teamIdA, String teamIdB) {
-        TeamStatisticsDTO teamA = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA));
-        TeamStatisticsDTO teamB = this.webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB));
+    public ComparisonDto getTeamsComparison(String teamAName, String teamBName) {
+        String requestedTeamAName = InputSanitizer.sanitizeInput(teamAName);
+        String requestedTeamBName = InputSanitizer.sanitizeInput(teamBName);
+
+        if (requestedTeamAName.isEmpty() || requestedTeamBName.isEmpty()) {
+            throw new IllegalArgumentException("Team names cannot be null or empty");
+        }
+
+        int teamAId = WhoScoredIdsUtil.getTeamIdFromTeamName(requestedTeamAName);
+        int teamBId = WhoScoredIdsUtil.getTeamIdFromTeamName(requestedTeamBName);
+
+        if (requestedTeamAName.equals(requestedTeamBName)) {
+            throw new IllegalArgumentException("Cannot compare a team with itself");
+        }
+
+        logger.debug("Comparing teams {} and {}", requestedTeamAName, requestedTeamBName);
+
+        TeamStatisticsDTO teamA = this.webScrapingService.scrapTeamStatisticsById(teamAId);
+        TeamStatisticsDTO teamB = this.webScrapingService.scrapTeamStatisticsById(teamBId);
 
         return ComparisonDto.builder()
                                         .teamB(teamB)

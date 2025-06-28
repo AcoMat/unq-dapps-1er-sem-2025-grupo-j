@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.unit.services;
+package unq.dapp.grupoj.soccergenius.unit.services.external.whoscored;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

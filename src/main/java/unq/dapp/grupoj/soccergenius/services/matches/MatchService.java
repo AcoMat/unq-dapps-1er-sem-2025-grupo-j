@@ -3,6 +3,7 @@ package unq.dapp.grupoj.soccergenius.services.matches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unq.dapp.grupoj.soccergenius.exceptions.FootballDataApiException;
 import unq.dapp.grupoj.soccergenius.exceptions.GenAiResponseException;
 import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
@@ -13,6 +14,10 @@ import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingServ
 import unq.dapp.grupoj.soccergenius.services.team.TeamService;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
+import unq.dapp.grupoj.soccergenius.util.FootballDataIdsUtil;
+import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
+import unq.dapp.grupoj.soccergenius.util.WhoScoredIdsUtil;
+
 import java.util.List;
 
 @Service
@@ -23,17 +28,20 @@ public class MatchService {
     private final FootballDataApiService footballDataApiService;
     private final MatchScrapingService matchScrapingService;
     private final TeamScrapingService teamScrapingService;
+    private final Client client;
 
     public MatchService(
             TeamService teamService,
             FootballDataApiService footballDataApiService,
             MatchScrapingService matchScrapingService,
-            TeamScrapingService teamScrapingService
+            TeamScrapingService teamScrapingService,
+            Client client
     ) {
         this.teamService = teamService;
         this.footballDataApiService = footballDataApiService;
         this.matchScrapingService = matchScrapingService;
         this.teamScrapingService = teamScrapingService;
+        this.client = client;
     }
 
     /**
@@ -95,8 +103,10 @@ public class MatchService {
         return result.toString();
     }
 
-    public String getMatchPredictionBetween(int team1Id, int team2Id) {
-        logger.info("Solicitando predicción para partido entre equipos con ID {} y {}", team1Id, team2Id);
+    public String getMatchPredictionBetween(String team1Name, String team2Name) {
+        team1Name = InputSanitizer.sanitizeInput(team1Name);
+        team2Name = InputSanitizer.sanitizeInput(team2Name);
+        logger.info("Solicitando predicción para partido entre equipos con ID {} y {}", team1Name, team2Name);
         /*
         Datos para predecir un partido
         - Ultimos 5 partidos de local de cada equipo
@@ -105,44 +115,57 @@ public class MatchService {
         - Posicion en la tabla de la liga
         - Numero de rating del equipo
         */
+        if (team1Name.isEmpty() || team2Name.isEmpty()) {
+            throw new IllegalArgumentException("Los nombres de los equipos no pueden ser nulos");
+        }
+        // Obtener los Ids para Football Data API
+        int footballDataTeam1Id = FootballDataIdsUtil.getTeamIdFromTeamName(team1Name);
+        int footballDataTeam2Id = FootballDataIdsUtil.getTeamIdFromTeamName(team2Name);
+        // Obtener los Ids para WhoScored
+        int team1IdWhoScored = WhoScoredIdsUtil.getTeamIdFromTeamName(team1Name);
+        int team2IdWhoScored = WhoScoredIdsUtil.getTeamIdFromTeamName(team2Name);
 
-        TeamDto team1 = teamService.getTeamFromLaLigaById(team1Id);
-        TeamDto team2 = teamService.getTeamFromLaLigaById(team2Id);
+        TeamDto team1 = teamService.getTeamFromLaLigaById(team1IdWhoScored);
+        TeamDto team2 = teamService.getTeamFromLaLigaById(team2IdWhoScored);
 
-        // Obtener los IDs correctos para Football Data API
-        int footballDataTeam1Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team1Id);
-        int footballDataTeam2Id = footballDataApiService.convertWhoScoredIdToFootballDataId(team2Id);
+        List<FootballDataMatchDto> lastMatchesTeam1;
+        List<FootballDataMatchDto> lastMatchesTeam2;
+        List<FootballDataMatchDto> lastHomeMatchesTeam1 = null;
+        List<FootballDataMatchDto> lastAwayMatchesTeam1 = null;
+        List<FootballDataMatchDto> lastHomeMatchesTeam2 = null;
+        List<FootballDataMatchDto> lastAwayMatchesTeam2 = null;
 
-        List<FootballDataMatchDto> lastMatchesTeam1 = footballDataApiService.getLastXMatchesFromTeam(team1Id, 25).getMatches();
-        List<FootballDataMatchDto> lastMatchesTeam2 = footballDataApiService.getLastXMatchesFromTeam(team2Id, 25).getMatches();
+        try {
+            lastMatchesTeam1 = footballDataApiService.getLastXMatchesFromTeam(footballDataTeam1Id, 25).getMatches();
+            lastMatchesTeam2 = footballDataApiService.getLastXMatchesFromTeam(footballDataTeam2Id, 25).getMatches();
+            lastHomeMatchesTeam1 = lastMatchesTeam1.stream()
+                    .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam1Id))
+                    .limit(5)
+                    .toList();
 
-        assert lastMatchesTeam1 != null;
-        List<FootballDataMatchDto> lastHomeMatchesTeam1 = lastMatchesTeam1.stream()
-                .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam1Id))
-                .limit(5)
-                .toList();
+            lastAwayMatchesTeam1 = lastMatchesTeam1.stream()
+                    .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam1Id))
+                    .limit(5)
+                    .toList();
 
-        List<FootballDataMatchDto> lastAwayMatchesTeam1 = lastMatchesTeam1.stream()
-                .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam1Id))
-                .limit(5)
-                .toList();
+            lastHomeMatchesTeam2 = lastMatchesTeam2.stream()
+                    .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam2Id))
+                    .limit(5)
+                    .toList();
 
-        assert lastMatchesTeam2 != null;
-        List<FootballDataMatchDto> lastHomeMatchesTeam2 = lastMatchesTeam2.stream()
-                .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam2Id))
-                .limit(5)
-                .toList();
+            lastAwayMatchesTeam2 = lastMatchesTeam2.stream()
+                    .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam2Id))
+                    .limit(5)
+                    .toList();
+        } catch (FootballDataApiException e) {
+            logger.error("Error al obtener los últimos partidos de los equipos {} y {}", team1Name, team2Name);
+        }
 
-        List<FootballDataMatchDto> lastAwayMatchesTeam2 = lastMatchesTeam2.stream()
-                .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam2Id))
-                .limit(5)
-                .toList();
+        double rankTeam1 = teamScrapingService.getCurrentRankingOfTeam(team1IdWhoScored);
+        double rankTeam2 = teamScrapingService.getCurrentRankingOfTeam(team2IdWhoScored);
 
-        double rankTeam1 = teamScrapingService.getCurrentRankingOfTeam(team1Id);
-        double rankTeam2 = teamScrapingService.getCurrentRankingOfTeam(team2Id);
-
-        int team1Position = teamScrapingService.getCurrentPositionOnLeague(team1Id);
-        int team2Position = teamScrapingService.getCurrentPositionOnLeague(team2Id);
+        int team1Position = teamScrapingService.getCurrentPositionOnLeague(team1IdWhoScored);
+        int team2Position = teamScrapingService.getCurrentPositionOnLeague(team2IdWhoScored);
 
         List<Match> lastMatchesBetweenTeams = matchScrapingService.getPreviousMeetings(team1.getName(), team2.getName());
 
@@ -154,7 +177,6 @@ public class MatchService {
         String previousMeetingsString = formatPreviousMeetings(lastMatchesBetweenTeams);
 
         logger.info("Preparando solicitud a Gemini AI para predicción de partido entre {} y {}", team1.getName(), team2.getName());
-        Client client = new Client();
 
         try {
             logger.info("Enviando solicitud a Gemini AI");

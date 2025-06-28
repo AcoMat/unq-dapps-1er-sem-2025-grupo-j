@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
+import unq.dapp.grupoj.soccergenius.model.dtos.TeamStatisticsDTO;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 
@@ -93,6 +94,29 @@ class TeamControllerE2ETest {
         result.andExpect(jsonPath("$", instanceOf(List.class)));
         result.andExpect(jsonPath("$", hasSize(greaterThan(0))));
         result.andExpect(jsonPath("$[0]", instanceOf(String.class)));
+    }
+
+    @Test
+    @WithMockUser
+    void compareTeams_whenValidTeams_shouldReturnComparison() throws Exception {
+        String team1 = "Real Madrid";
+        String team2 = "Barcelona";
+        int team1Id = 52;
+        int team2Id = 65;
+        // Arrange
+        TeamStatisticsDTO team1Stats = new TeamStatisticsDTO(team1, "10", "20", "15", "60%", "85%", "70%", "5", "4", "2");
+        TeamStatisticsDTO team2Stats = new TeamStatisticsDTO(team2, "12", "22", "18", "65%", "90%", "75%", "3", "1", "0");
+
+        when(teamScrapingService.scrapTeamStatisticsById(team1Id)).thenReturn(team1Stats);
+        when(teamScrapingService.scrapTeamStatisticsById(team2Id)).thenReturn(team2Stats);
+
+        final ResultActions result = this.mockMvc.perform(get("/teams/comparison?teamAName=" + team1 + "&teamBName=" + team2)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+        result.andExpect(jsonPath("$.teamA.name", is(team1)));
+        result.andExpect(jsonPath("$.teamB.name", is(team2)));
     }
 
     /* TESTS DISABLED DUE API SUB CHANGES

@@ -9,7 +9,7 @@ public class InputSanitizer {
         if (input == null) return "";
 
         String sanitized = input.toLowerCase();
-        sanitized = sanitized.replaceAll("[^a-z]", "");
+        sanitized = sanitized.replaceAll("[^a-zñ ]", "");
         sanitized = sanitized
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")

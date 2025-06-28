@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import unq.dapp.grupoj.soccergenius.exceptions.FootballDataApiException;
 import unq.dapp.grupoj.soccergenius.model.dtos.external.football_data.FootballDataMatchsDto;
+import unq.dapp.grupoj.soccergenius.util.FootballDataIdsUtil;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -30,17 +31,7 @@ public class FootballDataApiService {
         this.restTemplate = restTemplate;
     }
 
-    /**
-     * Converts a WhoScored team ID to the corresponding Football-data.org team ID
-     * @param whoScoredTeamId Team ID from WhoScored
-     * @return Corresponding team ID for Football-data.org API or null if no mapping exists
-     */
-    public Integer convertWhoScoredIdToFootballDataId(int whoScoredTeamId) {
-        return TeamIdMappingUtil.whoScoredToFootballDataTeamIdMap(whoScoredTeamId);
-    }
-
     public FootballDataMatchsDto getLastXMatchesFromTeam(int teamId, int limit) {
-        int footballDataId = TeamIdMappingUtil.whoScoredToFootballDataTeamIdMap(teamId);
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(1);
 
@@ -48,24 +39,27 @@ public class FootballDataApiService {
         String dateFrom = startDate.format(formatter);
         String dateTo = endDate.format(formatter);
 
-        String url = baseUrl + "/teams/" + footballDataId + "/matches?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&limit=" + limit + "&status=FINISHED";
+        String url = baseUrl + "/teams/" + teamId + "/matches?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&limit=" + limit + "&status=FINISHED";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Auth-Token", apiKey);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<FootballDataMatchsDto> response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            entity,
-            FootballDataMatchsDto.class
-        );
-
-        return response.getBody();
+        try {
+            ResponseEntity<FootballDataMatchsDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    FootballDataMatchsDto.class
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            throw new FootballDataApiException("Error fetching last matches for team with ID: " + teamId + ".");
+        }
     }
 
     public FootballDataMatchsDto getUpcomingMatchesFromTeam(String teamName) {
-        int footballDataId = TeamIdMappingUtil.footballDataTeamIdFromName(teamName);
+        int footballDataId = FootballDataIdsUtil.getTeamIdFromTeamName(teamName);
 
         String url = "https://api.football-data.org/v4/teams/id/matches?status=SCHEDULED".replace("id", String.valueOf(footballDataId));
 
@@ -73,18 +67,20 @@ public class FootballDataApiService {
         headers.set("X-Auth-Token", apiKey);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<FootballDataMatchsDto> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                FootballDataMatchsDto.class
-        );
+        try {
+            ResponseEntity<FootballDataMatchsDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    FootballDataMatchsDto.class
+            );
 
-        if(response.getStatusCode().isError()) {
-            throw new FootballDataApiException("Error fetching upcoming matches for team: " + teamName);
+            if (response.getStatusCode().isError()) {
+                throw new FootballDataApiException("Error fetching upcoming matches for team: " + teamName);
+            }
+            return response.getBody();
+        } catch (Exception e) {
+            throw new FootballDataApiException("Error fetching upcoming matches for team: " + teamName + ".");
         }
-
-        return response.getBody();
     }
-
 }

@@ -196,76 +196,63 @@ class TeamServiceTest {
     }
 
     @Test
-    void getTeamsComparison_SuccessfulCase() {
-        String teamIdA = "1";
-        String teamIdB = "2";
+    void getTeamsComparison_WithInvalidTeamA_ShouldThrowError() {
+        String teamAName = "Inter";
+        String teamBName = "Barcelona";
 
-        TeamStatisticsDTO teamAStats = TeamStatisticsDTO.builder()
-                                        .name("Team A")
-                                        .totalMatchesPlayedStr("4")
-                                        .totalGoalsStr("13")
-                                        .avgShotsPerGameStr("23")
-                                        .avgPossessionStr("89")
-                                        .avgPassSuccessStr("90")
-                                        .avgAerialWonPerGameStr("34")
-                                        .overallRatingStr("99")
-                                        .totalYellowCardsStr("7")
-                                        .totalRedCardsStr("9")
-                                        .build();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                teamService.getTeamsComparison(teamAName, teamBName));
 
-        TeamStatisticsDTO teamBStats = TeamStatisticsDTO.builder()
-                                        .name("Team B")
-                                        .totalMatchesPlayedStr("4")
-                                        .totalGoalsStr("13")
-                                        .avgShotsPerGameStr("23")
-                                        .avgPossessionStr("89")
-                                        .avgPassSuccessStr("90")
-                                        .avgAerialWonPerGameStr("34")
-                                        .overallRatingStr("99")
-                                        .totalYellowCardsStr("7")
-                                        .totalRedCardsStr("9")
-                                        .build();
-
-        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA)))
-                .thenReturn(teamAStats);
-        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdB)))
-                .thenReturn(teamBStats);
-
-        ComparisonDto result = teamService.getTeamsComparison(teamIdA, teamIdB);
-
-        assertNotNull(result);
-        assertEquals(teamAStats, result.getTeamA());
-        assertEquals(teamBStats, result.getTeamB());
-
-        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdA));
-        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdB));
-        verifyNoMoreInteractions(webScrapingService);
+        assertEquals("No LaLiga team found for: " + teamAName.toLowerCase(), exception.getMessage());
+        verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
     }
 
     @Test
-    void getTeamsComparison_ErrorCase_ScrapingFails() {
-        String teamIdA = "1";
-        String teamIdB = "2";
+    void getTeamsComparison_WithInvalidTeamB_ShouldThrowError() {
+        String teamAName = "Barcelona";
+        String teamBName = "Miami Inter";
 
-        when(webScrapingService.scrapTeamStatisticsById(Integer.parseInt(teamIdA)))
-                .thenThrow(new ScrappingException("Error scraping team A"));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                teamService.getTeamsComparison(teamAName, teamBName));
 
-        ScrappingException thrown = assertThrows(ScrappingException.class, () -> teamService.getTeamsComparison(teamIdA, teamIdB));
-
-        assertTrue(thrown.getMessage().contains("Error scraping team A"));
-
-        verify(webScrapingService).scrapTeamStatisticsById(Integer.parseInt(teamIdA));
-        verify(webScrapingService, never()).scrapTeamStatisticsById(Integer.parseInt(teamIdB));
-        verifyNoMoreInteractions(webScrapingService);
+        assertEquals("No LaLiga team found for: " + teamBName.toLowerCase(), exception.getMessage());
+        verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
     }
 
     @Test
-    void getTeamsComparison_ErrorCase_InvalidTeamIdFormat() {
-        String teamIdA = "invalid-id";
-        String teamIdB = "2";
+    void getTeamsComparison_WithSameTeam_ShouldThrowError() {
+        String teamAName = "Barcelona";
+        String teamBName = "Barcelona";
 
-        assertThrows(NumberFormatException.class, () -> teamService.getTeamsComparison(teamIdA, teamIdB));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                teamService.getTeamsComparison(teamAName, teamBName));
 
-        verifyNoInteractions(webScrapingService);
+        assertEquals("Cannot compare a team with itself", exception.getMessage());
+        verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
     }
+
+    @Test
+    void getTeamsComparison_WithEmptyTeamA_ShouldThrowError() {
+        String teamAName = "";
+        String teamBName = "Barcelona";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                teamService.getTeamsComparison(teamAName, teamBName));
+
+        assertEquals("Team names cannot be null or empty", exception.getMessage());
+        verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
+    }
+
+    @Test
+    void getTeamsComparison_WithEmptyTeamB_ShouldThrowError() {
+        String teamAName = "Real Madrid";
+        String teamBName = "";
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                teamService.getTeamsComparison(teamAName, teamBName));
+
+        assertEquals("Team names cannot be null or empty", exception.getMessage());
+        verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
+    }
+
 }

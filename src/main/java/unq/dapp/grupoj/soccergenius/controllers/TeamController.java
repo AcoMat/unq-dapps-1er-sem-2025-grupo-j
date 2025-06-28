@@ -88,14 +88,13 @@ public class TeamController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Teams compared successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid team IDs"),
-            @ApiResponse(responseCode = "404", description = "One or both teams not found")
+            @ApiResponse(responseCode = "400", description = "Invalid team names"),
     })
     public ResponseEntity<ComparisonDto> getTeamComparison(
-            @Parameter(description = "ID of the first team to compare", example = "1") @RequestParam String teamIdA,
-            @Parameter(description = "ID of the second team to compare", example = "2") @RequestParam String teamIdB) {
+            @Parameter(description = "Name of the first team to compare", example = "1") @RequestParam String teamAName,
+            @Parameter(description = "Name of the second team to compare", example = "2") @RequestParam String teamBName) {
 
-        ComparisonDto comparisonDto = this.teamService.getTeamsComparison(teamIdA, teamIdB);
+        ComparisonDto comparisonDto = this.teamService.getTeamsComparison(teamAName, teamBName);
         return ResponseEntity.status(HttpStatus.OK).body(comparisonDto);
     }
 

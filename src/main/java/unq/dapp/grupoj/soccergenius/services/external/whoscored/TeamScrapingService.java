@@ -213,45 +213,54 @@ public class TeamScrapingService extends WebScrapingService {
 
     public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
         String url = baseUrlTeams + teamId;
-        WebDriver driver = setupDriverAndNavigate(url);
+        WebDriver driver = null;
+        try {
+            driver = setupDriverAndNavigate(url);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
 
-        WebElement countryNameContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.cssSelector("#breadcrumb-nav span.iconize.iconize-icon-left")
-        ));
-        String teamName = countryNameContainer.getText().trim();
+            WebElement countryNameContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("#breadcrumb-nav span.iconize.iconize-icon-left")
+            ));
+            String teamName = countryNameContainer.getText().trim();
 
-        WebElement tableBody   = driver.findElement(By.id("top-team-stats-summary-content"));
-        WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
-        List<WebElement> cells = summaryRow.findElements(By.tagName("td"));
+            WebElement tableBody   = driver.findElement(By.id("top-team-stats-summary-content"));
+            WebElement summaryRow  = tableBody.findElement(By.xpath("./tr[last()]"));
+            List<WebElement> cells = summaryRow.findElements(By.tagName("td"));
 
-        final String tagNameStrong = "strong";
+            final String tagNameStrong = "strong";
 
-        String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName(tagNameStrong)).getText();
-        String totalGoalsStr          = cells.get(2).findElement(By.tagName(tagNameStrong)).getText();
-        String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName(tagNameStrong)).getText();
-        String avgPossessionStr       = cells.get(5).findElement(By.tagName(tagNameStrong)).getText();
-        String avgPassSuccessStr      = cells.get(6).findElement(By.tagName(tagNameStrong)).getText();
-        String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName(tagNameStrong)).getText();
-        String overallRatingStr       = cells.get(8).findElement(By.tagName(tagNameStrong)).getText();
+            String totalMatchesPlayedStr  = cells.get(1).findElement(By.tagName(tagNameStrong)).getText();
+            String totalGoalsStr          = cells.get(2).findElement(By.tagName(tagNameStrong)).getText();
+            String avgShotsPerGameStr     = cells.get(3).findElement(By.tagName(tagNameStrong)).getText();
+            String avgPossessionStr       = cells.get(5).findElement(By.tagName(tagNameStrong)).getText();
+            String avgPassSuccessStr      = cells.get(6).findElement(By.tagName(tagNameStrong)).getText();
+            String avgAerialWonPerGameStr = cells.get(7).findElement(By.tagName(tagNameStrong)).getText();
+            String overallRatingStr       = cells.get(8).findElement(By.tagName(tagNameStrong)).getText();
 
-        WebElement cardCell        = cells.get(4);
-        String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();
-        String totalRedCardsStr    = cardCell.findElement(By.xpath(".//span[@class='red-card-box']/strong")).getText();
+            WebElement cardCell        = cells.get(4);
+            String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();
+            String totalRedCardsStr    = cardCell.findElement(By.xpath(".//span[@class='red-card-box']/strong")).getText();
 
-        return TeamStatisticsDTO.builder()
-                                                .name(teamName)
-                                                .totalMatchesPlayedStr(totalMatchesPlayedStr)
-                                                .avgShotsPerGameStr(avgShotsPerGameStr)
-                                                .totalGoalsStr(totalGoalsStr)
-                                                .avgPassSuccessStr(avgPassSuccessStr)
-                                                .avgPossessionStr(avgPossessionStr)
-                                                .avgAerialWonPerGameStr(avgAerialWonPerGameStr)
-                                                .overallRatingStr(overallRatingStr)
-                                                .totalYellowCardsStr(totalYellowCardsStr)
-                                                .totalRedCardsStr(totalRedCardsStr)
-                                                .build();
+            return TeamStatisticsDTO.builder()
+                                                    .name(teamName)
+                                                    .totalMatchesPlayedStr(totalMatchesPlayedStr)
+                                                    .avgShotsPerGameStr(avgShotsPerGameStr)
+                                                    .totalGoalsStr(totalGoalsStr)
+                                                    .avgPassSuccessStr(avgPassSuccessStr)
+                                                    .avgPossessionStr(avgPossessionStr)
+                                                    .avgAerialWonPerGameStr(avgAerialWonPerGameStr)
+                                                    .overallRatingStr(overallRatingStr)
+                                                    .totalYellowCardsStr(totalYellowCardsStr)
+                                                    .totalRedCardsStr(totalRedCardsStr)
+                                                    .build();
+        } catch (Exception e) {
+            throw new ScrappingException("Error scraping team statistics: " + e.getMessage());
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 }
