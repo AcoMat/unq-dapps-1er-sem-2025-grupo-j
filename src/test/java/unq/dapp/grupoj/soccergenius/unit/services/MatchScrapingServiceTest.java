@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class MatchScrapingServiceTest {
+class MatchScrapingServiceTest {
     @Mock
     private WebDriver mockDriver;
 
@@ -219,7 +219,7 @@ public class MatchScrapingServiceTest {
 
         // Assert
         assertEquals(1, previousMeetings.size());
-        Match match = previousMeetings.get(0);
+        Match match = previousMeetings.getFirst();
         assertEquals("match123", match.getId());
         assertEquals("01 Jan 2023", match.getDate());
         assertEquals(teamA, match.getHomeTeam());
@@ -251,7 +251,7 @@ public class MatchScrapingServiceTest {
 
 
         List<Match> previousMeetings = matchScrapingService.getPreviousMeetings(teamA, teamB);
-        assertEquals("15 Feb 2024", previousMeetings.get(0).getDate());
+        assertEquals("15 Feb 2024", previousMeetings.getFirst().getDate());
         verify(mockDriver).quit();
     }
 

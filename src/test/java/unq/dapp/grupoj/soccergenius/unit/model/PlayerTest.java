@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class PlayerTest {
+class PlayerTest {
     private Player player;
     private final int playerId = 1;
     private final String playerName = "Lionel Messi";

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class TeamServiceTest {
+class TeamServiceTest {
     @Mock
     private TeamScrapingService webScrapingService;
     @Mock

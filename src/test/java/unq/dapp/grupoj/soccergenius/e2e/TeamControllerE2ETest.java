@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("e2e")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TeamControllerE2ETest {
+class TeamControllerE2ETest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -43,7 +43,7 @@ public class TeamControllerE2ETest {
 
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         teamRepository.deleteAll();
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
@@ -53,7 +53,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamById_whenTeamExists_shouldReturnTeamDto() throws Exception {
+    void getTeamById_whenTeamExists_shouldReturnTeamDto() throws Exception {
         long existingTeamId = 839;
         Team mockedTeam = new Team((int) existingTeamId, "Villarreal", "España", "LaLiga");
         when(teamScrapingService.scrapTeamDataById((int) existingTeamId)).thenReturn(mockedTeam);
@@ -70,7 +70,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamById_whenTeamDoesNotExist_shouldReturnNotFound() throws Exception {
+    void getTeamById_whenTeamDoesNotExist_shouldReturnNotFound() throws Exception {
         long nonExistentTeamId = 0;
         when(teamScrapingService.scrapTeamDataById((int) nonExistentTeamId)).thenThrow(new TeamNotFoundException("Team not found"));
 
@@ -83,7 +83,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamPlayers_whenTeamExists_shouldReturnPlayerList() throws Exception {
+    void getTeamPlayers_whenTeamExists_shouldReturnPlayerList() throws Exception {
         when(teamScrapingService.getPlayersNamesFromTeam("river", "argentina")).thenReturn(List.of(" Armani ", "Diaz"));
 
         final ResultActions result = this.mockMvc.perform(get("/teams/river/argentina/players")
@@ -98,7 +98,7 @@ public class TeamControllerE2ETest {
     /* TESTS DISABLED DUE API SUB CHANGES
     @Test
     @WithMockUser
-    public void getUpcomingMatches_whenTeamExists_shouldReturnTeamDto() throws Exception {
+    void getUpcomingMatches_whenTeamExists_shouldReturnTeamDto() throws Exception {
         final ResultActions result = this.mockMvc.perform(get("/teams/getafe/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -108,7 +108,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getUpcomingMatches_whenTeamDoesNotExist_shouldReturnTeamDto() throws Exception {
+    void getUpcomingMatches_whenTeamDoesNotExist_shouldReturnTeamDto() throws Exception {
         final ResultActions result = this.mockMvc.perform(get("/teams/getafes/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 

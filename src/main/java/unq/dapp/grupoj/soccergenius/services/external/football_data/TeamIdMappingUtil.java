@@ -5,6 +5,10 @@ import java.util.Map;
 
 public class TeamIdMappingUtil {
 
+    private TeamIdMappingUtil() {
+        throw new IllegalStateException("Utility class should not be instantiated");
+    }
+
     private static final Map<Integer, Integer> teamIdsMap = new HashMap<>();
     private static final Map<String, Integer> teamNamesMap = new HashMap<>();
 

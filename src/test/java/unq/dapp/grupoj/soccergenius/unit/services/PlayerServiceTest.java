@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class PlayerServiceTest {
+class PlayerServiceTest {
     @Mock
     private PlayerRepository playerRepository;
 

@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class TeamScrapingService extends WebScrapingService {
 
-    final String baseUrlTeams = "https://es.whoscored.com/teams/";
+    final static String baseUrlTeams = "https://es.whoscored.com/teams/";
 
     public List<String> getPlayersNamesFromTeam(String teamName, String country) {
         WebDriver driver = null;
@@ -212,9 +212,8 @@ public class TeamScrapingService extends WebScrapingService {
     }
 
     public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
-        WebDriver driver = null;
         String url = baseUrlTeams + teamId;
-        driver = setupDriverAndNavigate(url);
+        WebDriver driver = setupDriverAndNavigate(url);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
@@ -242,7 +241,7 @@ public class TeamScrapingService extends WebScrapingService {
         String totalYellowCardsStr = cardCell.findElement(By.xpath(".//span[@class='yellow-card-box']/strong")).getText();
         String totalRedCardsStr    = cardCell.findElement(By.xpath(".//span[@class='red-card-box']/strong")).getText();
 
-        TeamStatisticsDTO teamStatisticsDTO =   TeamStatisticsDTO.builder()
+        return TeamStatisticsDTO.builder()
                                                 .name(teamName)
                                                 .totalMatchesPlayedStr(totalMatchesPlayedStr)
                                                 .avgShotsPerGameStr(avgShotsPerGameStr)
@@ -254,6 +253,5 @@ public class TeamScrapingService extends WebScrapingService {
                                                 .totalYellowCardsStr(totalYellowCardsStr)
                                                 .totalRedCardsStr(totalRedCardsStr)
                                                 .build();
-        return teamStatisticsDTO;
     }
 }

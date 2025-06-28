@@ -15,6 +15,7 @@ import unq.dapp.grupoj.soccergenius.util.InputSanitizer;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,24 +27,24 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class FootballDataApiServiceTest {
+class FootballDataApiServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
     private FootballDataApiService footballDataApiService;
-    private final String BASE_URL = "http://api.football-data.org/v4";
-    private final String API_KEY = "test-api-key";
+    private final String baseUrl = "http://api.football-data.org/v4";
+    private final String apiKey = "test-api-key";
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         footballDataApiService = new FootballDataApiService(restTemplate);
         // Set the private fields using ReflectionTestUtils since @Value won't work in unit tests
-        ReflectionTestUtils.setField(footballDataApiService, "baseUrl", BASE_URL);
-        ReflectionTestUtils.setField(footballDataApiService, "apiKey", API_KEY);
+        ReflectionTestUtils.setField(footballDataApiService, "baseUrl", baseUrl);
+        ReflectionTestUtils.setField(footballDataApiService, "apiKey", apiKey);
     }
 
     @Test
-    public void testConvertWhoScoredIdToFootballDataId() {
+    void testConvertWhoScoredIdToFootballDataId() {
         // Arrange
         int whoScoredTeamId = 52;
         int expectedFootballDataId = 86;
@@ -54,7 +55,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testGetLastXMatchesFromTeam() {
+    void testGetLastXMatchesFromTeam() {
         // Arrange
         int whoScoredTeamId = 52;
         int limit = 5;
@@ -67,7 +68,7 @@ public class FootballDataApiServiceTest {
         String dateFrom = startDate.format(formatter);
         String dateTo = endDate.format(formatter);
 
-        String expectedUrl = BASE_URL + "/teams/" + footballDataId + "/matches?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&limit=" + limit + "&status=FINISHED";
+        String expectedUrl = baseUrl + "/teams/" + footballDataId + "/matches?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&limit=" + limit + "&status=FINISHED";
 
         // Setup response with more specific parameter matching
         ResponseEntity<FootballDataMatchsDto> responseEntity = new ResponseEntity<>(expectedResponse, HttpStatus.OK);
@@ -77,7 +78,7 @@ public class FootballDataApiServiceTest {
             argThat(entity -> {
                 HttpHeaders headers = entity.getHeaders();
                 return headers.containsKey("X-Auth-Token") &&
-                       headers.getFirst("X-Auth-Token").equals(API_KEY);
+                        Objects.equals(headers.getFirst("X-Auth-Token"), apiKey);
             }),
             eq(FootballDataMatchsDto.class)
         )).thenReturn(responseEntity);
@@ -98,7 +99,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testGetUpcomingMatchesFromTeam() {
+    void testGetUpcomingMatchesFromTeam() {
         // Arrange
         String teamName = InputSanitizer.sanitizeInput("Barcelona");
         int footballDataId = 65;
@@ -118,7 +119,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testGetUpcomingMatchesFromTeam_ThrowsException_WhenApiCallFails() {
+    void testGetUpcomingMatchesFromTeam_ThrowsException_WhenApiCallFails() {
         // Arrange
         String teamName = InputSanitizer.sanitizeInput("Barcelona");
 
@@ -133,7 +134,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testConvertWhoScoredIdToFootballDataId_WithNonLaLigaId() {
+    void testConvertWhoScoredIdToFootballDataId_WithNonLaLigaId() {
         // Arrange
         int nonLaLigaWhoScoredId = 9999; // ID not in LaLiga list
         // Act & Assert
@@ -141,7 +142,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testGetLastXMatchesFromTeam_WithNonLaLigaId() {
+    void testGetLastXMatchesFromTeam_WithNonLaLigaId() {
         // Arrange
         int nonLaLigaWhoScoredId = 9999; // ID not in LaLiga list
         int limit = 5;
@@ -153,7 +154,7 @@ public class FootballDataApiServiceTest {
     }
 
     @Test
-    public void testGetUpcomingMatchesFromTeam_WithNonLaLigaTeamName() {
+    void testGetUpcomingMatchesFromTeam_WithNonLaLigaTeamName() {
         // Arrange
         String nonLaLigaTeamName = InputSanitizer.sanitizeInput("Manchester United"); // Not a LaLiga team
 

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class PlayerScrapingServiceTest {
+class PlayerScrapingServiceTest {
     @Mock
     private WebDriver mockDriver;
 

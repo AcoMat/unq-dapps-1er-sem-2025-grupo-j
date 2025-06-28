@@ -60,12 +60,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<MatchDTO> getUpcomingMatches(String teamName) {
-        logger.debug("Fetching upcoming matches for team {}", teamName);
-        if (teamName == null || teamName.isEmpty()) {
+        String requestedTeamName = InputSanitizer.sanitizeInput(teamName);
+
+        logger.debug("Fetching upcoming matches for team {}", requestedTeamName);
+
+        if (requestedTeamName.isEmpty()) {
             throw new IllegalArgumentException("Team name cannot be null or empty");
         }
-
-        String requestedTeamName = InputSanitizer.sanitizeInput(teamName);
 
         FootballDataMatchsDto footballDataMatchsDto = this.footballDataApiService.getUpcomingMatchesFromTeam(requestedTeamName);
 
@@ -83,7 +84,7 @@ public class TeamServiceImpl implements TeamService {
                     return new MatchDTO(homeTeamName, awayTeamName, "La Liga", utcDate);
                 }).toList();
 
-        logger.debug("Retrieved {} upcoming matches for team {}", upcomingMatches.size(), teamName);
+        logger.debug("Retrieved {} upcoming matches for team {}", upcomingMatches.size(), requestedTeamName);
         return upcomingMatches;
 
     }
