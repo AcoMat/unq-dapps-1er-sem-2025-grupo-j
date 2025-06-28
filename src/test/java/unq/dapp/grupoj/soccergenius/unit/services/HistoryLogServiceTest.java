@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class HistoryLogServiceTest {
+class HistoryLogServiceTest {
 
     @Mock
     private HistoryLogRespository historyLogRespository;

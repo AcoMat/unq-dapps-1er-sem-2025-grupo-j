@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("e2e")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PlayerControllerE2ETest {
+class PlayerControllerE2ETest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired

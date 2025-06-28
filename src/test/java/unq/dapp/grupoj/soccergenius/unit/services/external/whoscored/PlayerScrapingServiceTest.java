@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.unit.services;
+package unq.dapp.grupoj.soccergenius.unit.services.external.whoscored;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class PlayerScrapingServiceTest {
+class PlayerScrapingServiceTest {
     @Mock
     private WebDriver mockDriver;
 

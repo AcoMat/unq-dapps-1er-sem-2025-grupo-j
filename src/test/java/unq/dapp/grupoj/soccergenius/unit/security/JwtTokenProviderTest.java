@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("unit")
 @Tag("unit")
-public class JwtTokenProviderTest {
+class JwtTokenProviderTest {
     private JwtTokenProvider jwtTokenProvider;
     private static final String TEST_JWT_SECRET_KEY = System.getenv("JWT_SECRET_KEY_SOCCER_GENIUS");
     private static final long EXPIRATION_TIME_MS = 1000L * 60 * 60;
@@ -45,48 +45,36 @@ public class JwtTokenProviderTest {
 
     @Test
     void generateToken_shouldThrowNullPointerException_forNullId() {
-        assertThrows(NullPointerException.class, () -> {
-            jwtTokenProvider.generateToken(null);
-        });
+        assertThrows(NullPointerException.class, () -> jwtTokenProvider.generateToken(null));
     }
 
     @Test
     void validateToken_shouldNotThrowException_forValidToken() {
         String token = jwtTokenProvider.generateToken(TEST_USER_ID);
-        assertDoesNotThrow(() -> {
-            jwtTokenProvider.validateToken(token);
-        });
+        assertDoesNotThrow(() -> jwtTokenProvider.validateToken(token));
     }
 
     @Test
     void validateToken_shouldNotThrowException_forValidTokenWithBearerPrefix() {
         String token = jwtTokenProvider.generateToken(TEST_USER_ID);
-        assertDoesNotThrow(() -> {
-            jwtTokenProvider.validateToken("Bearer " + token);
-        });
+        assertDoesNotThrow(() -> jwtTokenProvider.validateToken("Bearer " + token));
     }
 
     @Test
     void validateToken_shouldThrowTokenVerificationException_forNullToken() {
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken(null);
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken(null));
         assertEquals("Token not provided", exception.getMessage());
     }
 
     @Test
     void validateToken_shouldThrowTokenVerificationException_forEmptyToken() {
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken("");
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken(""));
         assertEquals("Token not provided", exception.getMessage());
     }
 
     @Test
     void validateToken_shouldThrowTokenVerificationException_forWhitespaceToken() {
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken("   ");
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken("   "));
         assertEquals("Token not provided", exception.getMessage());
     }
 
@@ -99,18 +87,14 @@ public class JwtTokenProviderTest {
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
                 .sign(wrongAlgorithm);
 
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken(tamperedToken);
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken(tamperedToken));
         assertEquals("Invalid or expired token", exception.getMessage());
     }
 
     @Test
     void validateToken_shouldThrowTokenVerificationException_forMalformedToken() {
         String malformedToken = "esto.no.es.un.jwt";
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken(malformedToken);
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken(malformedToken));
         assertEquals("Invalid or expired token", exception.getMessage());
     }
 
@@ -122,9 +106,7 @@ public class JwtTokenProviderTest {
                 .withExpiresAt(new Date(System.currentTimeMillis() - EXPIRATION_TIME_MS))
                 .sign(testAlgorithm);
 
-        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> {
-            jwtTokenProvider.validateToken(expiredToken);
-        });
+        TokenVerificationException exception = assertThrows(TokenVerificationException.class, () -> jwtTokenProvider.validateToken(expiredToken));
         assertEquals("Invalid or expired token", exception.getMessage());
     }
 
@@ -141,9 +123,7 @@ public class JwtTokenProviderTest {
         String userId = jwtTokenProvider.getUserIdFromToken(tokenWithoutPrefix);
         assertEquals(TEST_USER_ID.toString(), userId);
         String tokenWithBearer = "Bearer " + tokenWithoutPrefix;
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken(tokenWithBearer);
-        }, "getUserIdFromToken should fail if token has Bearer prefix and SUT doesn't handle it");
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(tokenWithBearer), "getUserIdFromToken should fail if token has Bearer prefix and SUT doesn't handle it");
     }
 
     @Test
@@ -155,17 +135,13 @@ public class JwtTokenProviderTest {
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
                 .sign(wrongAlgorithm);
 
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken(tamperedToken);
-        });
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(tamperedToken));
     }
 
     @Test
     void getUserIdFromToken_shouldThrowJWTVerificationException_forMalformedToken() {
         String malformedToken = "esto.no.es.un.jwt";
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken(malformedToken);
-        });
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(malformedToken));
     }
 
     @Test
@@ -176,22 +152,16 @@ public class JwtTokenProviderTest {
                 .withExpiresAt(new Date(System.currentTimeMillis() - EXPIRATION_TIME_MS))
                 .sign(testAlgorithm);
 
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken(expiredToken);
-        });
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(expiredToken));
     }
 
     @Test
     void getUserIdFromToken_shouldThrowException_forNullToken() {
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken(null);
-        });
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(null));
     }
 
     @Test
     void getUserIdFromToken_shouldThrowException_forEmptyToken() {
-        assertThrows(JWTVerificationException.class, () -> {
-            jwtTokenProvider.getUserIdFromToken("");
-        });
+        assertThrows(JWTVerificationException.class, () -> jwtTokenProvider.getUserIdFromToken(""));
     }
 }
