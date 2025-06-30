@@ -42,7 +42,6 @@ class TeamControllerE2ETest {
     @Autowired
     private TeamRepository teamRepository;
 
-
     @BeforeEach
     void setup() {
         teamRepository.deleteAll();

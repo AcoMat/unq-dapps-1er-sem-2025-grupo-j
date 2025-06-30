@@ -3,7 +3,6 @@ package unq.dapp.grupoj.soccergenius.services.matches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import unq.dapp.grupoj.soccergenius.exceptions.FootballDataApiException;
 import unq.dapp.grupoj.soccergenius.exceptions.GenAiResponseException;
 import unq.dapp.grupoj.soccergenius.model.Match;
 import unq.dapp.grupoj.soccergenius.model.dtos.TeamDto;
@@ -138,26 +137,28 @@ public class MatchService {
         try {
             lastMatchesTeam1 = footballDataApiService.getLastXMatchesFromTeam(footballDataTeam1Id, 25).getMatches();
             lastMatchesTeam2 = footballDataApiService.getLastXMatchesFromTeam(footballDataTeam2Id, 25).getMatches();
-            lastHomeMatchesTeam1 = lastMatchesTeam1.stream()
-                    .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam1Id))
-                    .limit(5)
-                    .toList();
+                assert lastMatchesTeam1 != null;
+                lastHomeMatchesTeam1 = lastMatchesTeam1.stream()
+                        .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam1Id))
+                        .limit(5)
+                        .toList();
 
-            lastAwayMatchesTeam1 = lastMatchesTeam1.stream()
-                    .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam1Id))
-                    .limit(5)
-                    .toList();
+                lastAwayMatchesTeam1 = lastMatchesTeam1.stream()
+                        .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam1Id))
+                        .limit(5)
+                        .toList();
 
-            lastHomeMatchesTeam2 = lastMatchesTeam2.stream()
-                    .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam2Id))
-                    .limit(5)
-                    .toList();
+                assert lastMatchesTeam2 != null;
+                lastHomeMatchesTeam2 = lastMatchesTeam2.stream()
+                        .filter(match -> match.getHomeTeam().getId() != null && match.getHomeTeam().getId().equals(footballDataTeam2Id))
+                        .limit(5)
+                        .toList();
 
-            lastAwayMatchesTeam2 = lastMatchesTeam2.stream()
-                    .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam2Id))
-                    .limit(5)
-                    .toList();
-        } catch (FootballDataApiException e) {
+                lastAwayMatchesTeam2 = lastMatchesTeam2.stream()
+                        .filter(match -> match.getAwayTeam().getId() != null && match.getAwayTeam().getId().equals(footballDataTeam2Id))
+                        .limit(5)
+                        .toList();
+        } catch (Exception e) {
             logger.error("Error al obtener los últimos partidos de los equipos {} y {}", team1Name, team2Name);
         }
 
