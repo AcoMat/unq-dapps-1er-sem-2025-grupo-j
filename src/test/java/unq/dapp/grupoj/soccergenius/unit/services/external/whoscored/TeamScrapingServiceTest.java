@@ -1,4 +1,4 @@
-package unq.dapp.grupoj.soccergenius.unit.services;
+package unq.dapp.grupoj.soccergenius.unit.services.external.whoscored;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -13,7 +13,9 @@ import unq.dapp.grupoj.soccergenius.exceptions.ScrappingException;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
+
 import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -21,7 +23,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("unit")
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
-public class TeamScrapingServiceTest {
+class TeamScrapingServiceTest {
 
     @Mock
     private WebDriver mockDriver;
@@ -42,14 +44,6 @@ public class TeamScrapingServiceTest {
     @Mock
     private WebElement mockSpanPais;
     @Mock
-    private WebElement mockPlayerListElement;
-    @Mock
-    private WebElement mockPlayerRowElement;
-    @Mock
-    private WebElement mockPlayerLinkElement;
-    @Mock
-    private WebElement mockPlayerIdElement;
-    @Mock
     private WebElement mockTableBodyStandings;
     @Mock
     private WebElement mockStandingsRow;
@@ -57,8 +51,6 @@ public class TeamScrapingServiceTest {
     private WebElement mockFirstCell;
     @Mock
     private WebElement mockPositionSpan;
-    @Mock
-    private WebElement mockRatingStrongElement;
     @Mock
     private WebElement mockTeamNameSpan;
     @Mock
@@ -71,7 +63,7 @@ public class TeamScrapingServiceTest {
 
     private final String teamName = "FC Barcelona";
     private final String teamCountry = "Spain";
-    private final int teamId = 101;
+    private final int teamId = 86;
     private final int playerId = 789;
 
     @BeforeEach

@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class FootballDataScoreDto {
-    private String winner;
-    private String duration;
-    private FootballDataScoreTimeDto fullTime;
-    private FootballDataScoreTimeDto halfTime;
+    public String winner;
+    public String duration;
+    public FootballDataScoreTimeDto fullTime;
+    public FootballDataScoreTimeDto halfTime;
 }
