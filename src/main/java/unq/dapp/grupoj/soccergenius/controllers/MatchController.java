@@ -18,7 +18,7 @@ public class MatchController {
     }
 
     @GetMapping("/prediction")
-    public ResponseEntity<String> getMatchPredictionBetween(@RequestParam int team1Id, @RequestParam int team2Id) {
-        return ResponseEntity.ok(matchService.getMatchPredictionBetween(team1Id, team2Id));
+    public ResponseEntity<String> getMatchPredictionBetween(@RequestParam String teamAName, @RequestParam String teamBName) {
+        return ResponseEntity.ok(matchService.getMatchPredictionBetween(teamAName, teamBName));
     }
 }

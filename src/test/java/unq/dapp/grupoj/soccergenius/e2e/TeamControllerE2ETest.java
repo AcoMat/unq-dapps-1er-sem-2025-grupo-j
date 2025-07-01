@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import unq.dapp.grupoj.soccergenius.exceptions.TeamNotFoundException;
 import unq.dapp.grupoj.soccergenius.model.Team;
+import unq.dapp.grupoj.soccergenius.model.dtos.TeamStatisticsDTO;
 import unq.dapp.grupoj.soccergenius.repository.TeamRepository;
 import unq.dapp.grupoj.soccergenius.services.external.whoscored.TeamScrapingService;
 
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("e2e")
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TeamControllerE2ETest {
+class TeamControllerE2ETest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -41,9 +42,8 @@ public class TeamControllerE2ETest {
     @Autowired
     private TeamRepository teamRepository;
 
-
     @BeforeEach
-    public void setup() {
+    void setup() {
         teamRepository.deleteAll();
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
@@ -53,7 +53,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamById_whenTeamExists_shouldReturnTeamDto() throws Exception {
+    void getTeamById_whenTeamExists_shouldReturnTeamDto() throws Exception {
         long existingTeamId = 839;
         Team mockedTeam = new Team((int) existingTeamId, "Villarreal", "España", "LaLiga");
         when(teamScrapingService.scrapTeamDataById((int) existingTeamId)).thenReturn(mockedTeam);
@@ -70,7 +70,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamById_whenTeamDoesNotExist_shouldReturnNotFound() throws Exception {
+    void getTeamById_whenTeamDoesNotExist_shouldReturnNotFound() throws Exception {
         long nonExistentTeamId = 0;
         when(teamScrapingService.scrapTeamDataById((int) nonExistentTeamId)).thenThrow(new TeamNotFoundException("Team not found"));
 
@@ -83,7 +83,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getTeamPlayers_whenTeamExists_shouldReturnPlayerList() throws Exception {
+    void getTeamPlayers_whenTeamExists_shouldReturnPlayerList() throws Exception {
         when(teamScrapingService.getPlayersNamesFromTeam("river", "argentina")).thenReturn(List.of(" Armani ", "Diaz"));
 
         final ResultActions result = this.mockMvc.perform(get("/teams/river/argentina/players")
@@ -95,10 +95,33 @@ public class TeamControllerE2ETest {
         result.andExpect(jsonPath("$[0]", instanceOf(String.class)));
     }
 
+    @Test
+    @WithMockUser
+    void compareTeams_whenValidTeams_shouldReturnComparison() throws Exception {
+        String team1 = "Real Madrid";
+        String team2 = "Barcelona";
+        int team1Id = 52;
+        int team2Id = 65;
+        // Arrange
+        TeamStatisticsDTO team1Stats = new TeamStatisticsDTO(team1, "10", "20", "15", "60%", "85%", "70%", "5", "4", "2");
+        TeamStatisticsDTO team2Stats = new TeamStatisticsDTO(team2, "12", "22", "18", "65%", "90%", "75%", "3", "1", "0");
+
+        when(teamScrapingService.scrapTeamStatisticsById(team1Id)).thenReturn(team1Stats);
+        when(teamScrapingService.scrapTeamStatisticsById(team2Id)).thenReturn(team2Stats);
+
+        final ResultActions result = this.mockMvc.perform(get("/teams/comparison?teamAName=" + team1 + "&teamBName=" + team2)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+        result.andExpect(jsonPath("$.teamA.name", is(team1)));
+        result.andExpect(jsonPath("$.teamB.name", is(team2)));
+    }
+
     /* TESTS DISABLED DUE API SUB CHANGES
     @Test
     @WithMockUser
-    public void getUpcomingMatches_whenTeamExists_shouldReturnTeamDto() throws Exception {
+    void getUpcomingMatches_whenTeamExists_shouldReturnTeamDto() throws Exception {
         final ResultActions result = this.mockMvc.perform(get("/teams/getafe/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -108,7 +131,7 @@ public class TeamControllerE2ETest {
 
     @Test
     @WithMockUser
-    public void getUpcomingMatches_whenTeamDoesNotExist_shouldReturnTeamDto() throws Exception {
+    void getUpcomingMatches_whenTeamDoesNotExist_shouldReturnTeamDto() throws Exception {
         final ResultActions result = this.mockMvc.perform(get("/teams/getafes/upcomingMatches")
                 .contentType(MediaType.APPLICATION_JSON));
 
