@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class TeamScrapingService extends WebScrapingService {
 
-    final static String baseUrlTeams = "https://es.whoscored.com/teams/";
+    private final String BASEURLTEAMS = "https://es.whoscored.com/teams/";
 
     public List<String> getPlayersNamesFromTeam(String teamName, String country) {
         WebDriver driver = null;
@@ -130,7 +130,7 @@ public class TeamScrapingService extends WebScrapingService {
     }
 
     public double getCurrentRankingOfTeam(int teamId) {
-        String url = baseUrlTeams + teamId;
+        String url = BASEURLTEAMS + teamId;
         WebDriver driver = null;
         try{
             driver = setupDriverAndNavigate(url);
@@ -168,7 +168,7 @@ public class TeamScrapingService extends WebScrapingService {
         String leagueName;
         String countryName;
 
-            String url = baseUrlTeams + teamId;
+            String url = BASEURLTEAMS + teamId;
         try {
             driver = setupDriverAndNavigate(url);
 
@@ -212,7 +212,7 @@ public class TeamScrapingService extends WebScrapingService {
     }
 
     public TeamStatisticsDTO scrapTeamStatisticsById(int teamId){
-        String url = baseUrlTeams + teamId;
+        String url = BASEURLTEAMS + teamId;
         WebDriver driver = null;
         try {
             driver = setupDriverAndNavigate(url);

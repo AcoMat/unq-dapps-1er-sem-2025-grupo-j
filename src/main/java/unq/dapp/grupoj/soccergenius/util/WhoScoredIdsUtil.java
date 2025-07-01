@@ -35,13 +35,6 @@ public class WhoScoredIdsUtil {
     }
 
     public static int getTeamIdFromTeamName(String teamName) {
-        if (teamName == null || teamName.isEmpty()) {
-            throw new IllegalArgumentException("Team name cannot be null or empty");
-        }
-        Integer teamId = teamNamesMap.get(teamName);
-        if (teamId == null) {
-            throw new IllegalArgumentException("No LaLiga team found for: " + teamName);
-        }
-        return teamId;
+        return IdUtil.getTeamIdFromTeamName(teamName, teamNamesMap, "LaLiga");
     }
 }

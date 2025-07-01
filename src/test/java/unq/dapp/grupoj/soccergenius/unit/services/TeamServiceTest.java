@@ -203,7 +203,7 @@ class TeamServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 teamService.getTeamsComparison(teamAName, teamBName));
 
-        assertEquals("No LaLiga team found for: " + teamAName.toLowerCase(), exception.getMessage());
+        assertEquals("No team found in LaLiga with name: " + teamAName.toLowerCase(), exception.getMessage());
         verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
     }
 
@@ -215,7 +215,7 @@ class TeamServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 teamService.getTeamsComparison(teamAName, teamBName));
 
-        assertEquals("No LaLiga team found for: " + teamBName.toLowerCase(), exception.getMessage());
+        assertEquals("No team found in LaLiga with name: " + teamBName.toLowerCase(), exception.getMessage());
         verify(webScrapingService, times(0)).scrapTeamStatisticsById(anyInt());
     }
 

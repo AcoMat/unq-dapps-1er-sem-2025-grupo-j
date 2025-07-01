@@ -35,14 +35,6 @@ public class FootballDataIdsUtil {
     }
 
     public static int getTeamIdFromTeamName(String teamName) {
-        if (teamName == null || teamName.isEmpty()) {
-            throw new IllegalArgumentException("Team name cannot be null or empty");
-        }
-        Integer teamId = teamNamesMap.get(teamName);
-        if (teamId == null) {
-            throw new IllegalArgumentException("No team found in LaLiga with name: " + teamName);
-        }
-
-        return teamId;
+        return IdUtil.getTeamIdFromTeamName(teamName, teamNamesMap, "LaLiga");
     }
 }
