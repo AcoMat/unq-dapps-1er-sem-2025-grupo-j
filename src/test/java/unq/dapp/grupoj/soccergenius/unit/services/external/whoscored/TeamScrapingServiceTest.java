@@ -326,8 +326,6 @@ class TeamScrapingServiceTest {
     @Test
     void scrapTeamStatisticsById_shouldReturnTeamStatistics_whenDataIsValid() {
         // Arrange
-        int teamId = 42;
-
         // Mock setupDriverAndNavigate to return our mock driver
         doReturn(mockDriver).when(teamScrapingService).setupDriverAndNavigate(anyString());
 
