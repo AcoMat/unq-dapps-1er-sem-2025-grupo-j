@@ -34,12 +34,12 @@ public class TeamScrapingService extends WebScrapingService {
             String teamUrl = "";
             for (WebElement team : teamsList) {
                 WebElement linkEquipo = team.findElement(By.xpath("./td[1]/a"));
-                String teamNameSource = linkEquipo.getText();
+                String teamNameSource = linkEquipo.getText().toLowerCase();
 
                 WebElement spanPais = team.findElement(By.xpath("./td[2]/span"));
-                String countryName = spanPais.getText();
+                String countryName = spanPais.getText().toLowerCase();
 
-                if (teamNameSource.toLowerCase().contains(teamName) && countryName.equalsIgnoreCase(country)){
+                if (teamNameSource.contains(teamName) && countryName.contains(country)){
                     teamUrl = linkEquipo.getAttribute("href");
                     break;
                 }
@@ -216,8 +216,7 @@ public class TeamScrapingService extends WebScrapingService {
         WebDriver driver = null;
         try {
             driver = setupDriverAndNavigate(url);
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            WebDriverWait wait = createWait(driver);
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("top-team-stats-summary-content")));
 
             WebElement teamNameElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
@@ -263,4 +262,9 @@ public class TeamScrapingService extends WebScrapingService {
             }
         }
     }
+
+    public WebDriverWait createWait(WebDriver driver) {
+        return new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
 }
+
