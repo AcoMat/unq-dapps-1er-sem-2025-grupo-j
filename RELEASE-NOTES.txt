@@ -1,0 +1,14 @@
+---------------------------------------------------------------------
+TAG 3.0
+---------------------------------------------------------------------
+NEW FEATURES (lo que están entregando y está funcionando):
+* Endpoint de métricas avanzadas
+* Endpoint de comparación de equipos
+* Test de arquitectura
+* Test de integración
+* Integracion con grafana y prometheus
+
+KNOWN ISSUES (ej: funcionalidad que saben que están funcionando diferente, algún error conocido en la funcionalidad terminada, etc) :
+* ninguna
+
+
